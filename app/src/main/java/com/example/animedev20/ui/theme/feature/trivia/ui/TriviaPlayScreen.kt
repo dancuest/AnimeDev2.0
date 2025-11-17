@@ -83,7 +83,6 @@ fun TriviaPlayScreen(
                     .padding(innerPadding)
                     .fillMaxSize()
             )
-
             is TriviaPlayUiState.Error -> TriviaPlayError(
                 message = state.message,
                 onRetry = viewModel::tryAgain,
@@ -91,7 +90,6 @@ fun TriviaPlayScreen(
                     .padding(innerPadding)
                     .fillMaxSize()
             )
-
             is TriviaPlayUiState.Success -> TriviaPlayContent(
                 state = state.state,
                 onDifficultySelected = viewModel::selectDifficulty,
@@ -140,7 +138,6 @@ private fun TriviaPlayContent(
                 onGoToHome = onGoToHome,
                 onGoToTrivia = onGoToTrivia
             )
-
             else -> TriviaQuestionCard(
                 state = state,
                 onAnswer = onAnswer,
@@ -265,10 +262,7 @@ private fun TriviaQuestionCard(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(
                 text = "Pregunta ${state.currentIndex + 1} de ${state.totalQuestions}",
                 style = MaterialTheme.typography.labelMedium,
@@ -343,10 +337,7 @@ private fun TriviaAnswerOption(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = containerColor,
-            contentColor = contentColor
-        ),
+        colors = CardDefaults.cardColors(containerColor = containerColor, contentColor = contentColor),
         onClick = { if (enabled) onClick() }
     ) {
         Text(
@@ -415,10 +406,7 @@ private fun TriviaPlayError(
     modifier: Modifier = Modifier
 ) {
     BoxWithCenteredContent(modifier) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(text = message, textAlign = TextAlign.Center)
             Button(onClick = onRetry) { Text("Reintentar") }
         }

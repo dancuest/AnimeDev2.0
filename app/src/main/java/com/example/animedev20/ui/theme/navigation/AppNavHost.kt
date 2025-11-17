@@ -8,8 +8,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.animedev20.ui.theme.feature.favorites.ui.FavoritesScreen
 import com.example.animedev20.ui.theme.feature.animeinfo.ui.AnimeDetailScreen
+import com.example.animedev20.ui.theme.feature.favorites.ui.FavoritesScreen
 import com.example.animedev20.ui.theme.feature.home.ui.HomeScreen
 import com.example.animedev20.ui.theme.feature.profile.ui.ProfileScreen
 import com.example.animedev20.ui.theme.feature.settings.ui.SettingsScreen

@@ -52,7 +52,6 @@ fun TriviaScreen(
             message = state.message,
             onRetry = viewModel::retry
         )
-
         is TriviaUiState.Success -> TriviaListContent(
             summaries = state.summaries,
             onPlayTrivia = onPlayTrivia

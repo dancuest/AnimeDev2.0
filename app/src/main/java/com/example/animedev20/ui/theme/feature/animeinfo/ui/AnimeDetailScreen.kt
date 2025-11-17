@@ -14,12 +14,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.outlined.Quiz
+import androidx.compose.material.icons.outlined.HelpOutline
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
@@ -216,7 +217,7 @@ private fun ActionButtons(
         }
         Spacer(modifier = Modifier.height(12.dp))
         OutlinedButton(onClick = onTrivia, modifier = Modifier.fillMaxWidth()) {
-            Icon(Icons.Outlined.Quiz, contentDescription = null)
+            Icon(Icons.Outlined.HelpOutline, contentDescription = null)
             Spacer(modifier = Modifier.size(8.dp))
             Text("Jugar trivia")
         }

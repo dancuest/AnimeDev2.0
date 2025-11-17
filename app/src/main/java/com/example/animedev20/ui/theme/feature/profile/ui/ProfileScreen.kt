@@ -60,6 +60,7 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.Factory)
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val profile = uiState.profile
 
     when {
         uiState.isLoading -> ProfileLoadingState()
@@ -68,8 +69,8 @@ fun ProfileScreen(
             onRetry = viewModel::refresh
         )
 
-        uiState.profile != null -> ProfileContent(
-            profile = uiState.profile,
+        profile != null -> ProfileContent(
+            profile = profile,
             recentAnimes = uiState.recentAnimes,
             triviaStats = uiState.triviaStats
         )
@@ -278,16 +279,16 @@ private fun ProfileStatsRow(profile: UserProfile) {
             .padding(horizontal = 16.dp, vertical = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        ProfileStatCard(title = "Animes vistos", value = profile.totalAnimesWatched.toString())
-        ProfileStatCard(title = "Trivias jugadas", value = profile.completedTrivias.toString())
-        ProfileStatCard(title = "Nivel cultural", value = profile.knowledgeLevel.split(" ").first())
+        ProfileStatCard(title = "Animes vistos", value = profile.totalAnimesWatched.toString(), modifier = Modifier.weight(1f))
+        ProfileStatCard(title = "Trivias jugadas", value = profile.completedTrivias.toString(), modifier = Modifier.weight(1f))
+        ProfileStatCard(title = "Nivel cultural", value = profile.knowledgeLevel.split(" ").first(), modifier = Modifier.weight(1f))
     }
 }
 
 @Composable
-private fun ProfileStatCard(title: String, value: String) {
+private fun ProfileStatCard(title: String, value: String, modifier: Modifier = Modifier) {
     Card(
-        modifier = Modifier.weight(1f),
+        modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Column(

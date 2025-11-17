@@ -5,9 +5,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.animedev20.ui.theme.data.FakeDataSource
 import com.example.animedev20.ui.theme.data.repository.FakeUserRepositoryImpl
-import com.example.animedev20.ui.theme.domain.model.Anime
-import com.example.animedev20.ui.theme.domain.model.TriviaProfileStats
-import com.example.animedev20.ui.theme.domain.model.UserProfile
 import com.example.animedev20.ui.theme.domain.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +13,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ProfileViewModel(
-    private val userRepository: UserRepository
+                       private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())
@@ -64,11 +61,3 @@ class ProfileViewModel(
         }
     }
 }
-
-data class ProfileUiState(
-    val isLoading: Boolean = true,
-    val profile: UserProfile? = null,
-    val recentAnimes: List<Anime> = emptyList(),
-    val triviaStats: TriviaProfileStats = FakeDataSource.defaultTriviaStats,
-    val errorMessage: String? = null
-)

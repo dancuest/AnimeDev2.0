@@ -338,6 +338,7 @@ private fun SettingsContentPreview() {
                 notificationsEnabled = true,
                 culturalAlertsEnabled = true,
                 autoplayNextEpisode = false,
+                hasCompletedOnboarding = true,
                 name = "Akira Morales",
                 email = "akira@animedev.io",
                 nickname = "OtakuSensei"

@@ -115,7 +115,8 @@ object FakeDataSource {
         preferredDuration = DurationType.MEDIUM,
         notificationsEnabled = true,
         culturalAlertsEnabled = true,
-        autoplayNextEpisode = false
+        autoplayNextEpisode = false,
+        hasCompletedOnboarding = false
     )
 
     val defaultUserProfile = UserProfile(

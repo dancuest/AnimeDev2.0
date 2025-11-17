@@ -15,17 +15,29 @@ import com.example.animedev20.ui.theme.feature.profile.ui.ProfileScreen
 import com.example.animedev20.ui.theme.feature.settings.ui.SettingsScreen
 import com.example.animedev20.ui.theme.feature.trivia.ui.TriviaPlayScreen
 import com.example.animedev20.ui.theme.feature.trivia.ui.TriviaScreen
+import com.example.animedev20.ui.theme.feature.onboarding.ui.OnboardingPreferencesRoute
 
 @Composable
 fun AppNavHost(
     navController: NavHostController,
-    modifier: Modifier
+    modifier: Modifier,
+    startDestination: String = Screen.Home.route
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.route,
+        startDestination = startDestination,
         modifier = modifier
     ) {
+        composable(Screen.Onboarding.route) {
+            OnboardingPreferencesRoute(
+                onContinue = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Onboarding.route) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
         composable(Screen.Home.route) {
             HomeScreen(onAnimeSelected = { animeId ->
                 navController.navigate(Screen.AnimeDetail.createRoute(animeId))

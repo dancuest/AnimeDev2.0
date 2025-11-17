@@ -1,13 +1,12 @@
-package com.example.animedev.data
+package com.example.animedev20.ui.theme.data
 
-import com.example.animedev.domain.model.Anime
-import com.example.animedev.domain.model.AnimeDetail
-import com.example.animedev.domain.model.AnimeSection
-import com.example.animedev.domain.model.DurationType
-import com.example.animedev.domain.model.EmissionStatus
-import com.example.animedev.domain.model.Episode
-import com.example.animedev.domain.model.Genre
-
+import com.example.animedev20.ui.theme.domain.model.Anime
+import com.example.animedev20.ui.theme.domain.model.AnimeDetail
+import com.example.animedev20.ui.theme.domain.model.AnimeSection
+import com.example.animedev20.ui.theme.domain.model.DurationType
+import com.example.animedev20.ui.theme.domain.model.EmissionStatus
+import com.example.animedev20.ui.theme.domain.model.Episode
+import com.example.animedev20.ui.theme.domain.model.Genre
 /**
  * Fuente de datos temporal para simular la respuesta de un backend real.
  */

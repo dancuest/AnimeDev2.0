@@ -1,11 +1,11 @@
-package com.example.animedev.domain.model
+package com.example.animedev20.ui.theme.domain.model
 
 /** Representa un episodio individual dentro de un anime. */
 data class Episode(
-    val number: Int,
-    val title: String,
-    val durationMinutes: Int,
-    val synopsis: String
+                   val number: Int,
+                   val title: String,
+                   val durationMinutes: Int,
+                   val synopsis: String
 )
 
 /**
@@ -13,7 +13,7 @@ data class Episode(
  * junto a metadatos ampliados y la lista de episodios.
  */
 data class AnimeDetail(
-    val anime: Anime,
-    val culturalNotes: List<String> = emptyList(),
-    val episodes: List<Episode> = emptyList()
+                       val anime: Anime,
+                       val culturalNotes: List<String> = emptyList(),
+                       val episodes: List<Episode> = emptyList()
 )

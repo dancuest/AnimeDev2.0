@@ -1,11 +1,11 @@
-package com.example.animedev.feature.favorites.ui
+package com.example.animedev20.ui.theme.feature.favorites.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.animedev.data.repository.FakeFavoritesRepositoryImpl
-import com.example.animedev.domain.model.Anime
-import com.example.animedev.domain.repository.FavoritesRepository
+import com.example.animedev20.ui.theme.data.repository.FakeFavoritesRepositoryImpl
+import com.example.animedev20.ui.theme.domain.model.Anime
+import com.example.animedev20.ui.theme.domain.repository.FavoritesRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn

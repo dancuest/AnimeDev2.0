@@ -1,11 +1,11 @@
-package com.example.animedev.feature.home.ui
+package com.example.animedev20.ui.theme.feature.home.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.animedev.data.repository.FakeAnimeRepositoryImpl
-import com.example.animedev.data.repository.FakeUserRepositoryImpl
-import com.example.animedev.domain.usecase.GetHomeContentUseCase
+import com.example.animedev20.ui.theme.data.repository.FakeAnimeRepositoryImpl
+import com.example.animedev20.ui.theme.data.repository.FakeUserRepositoryImpl
+import com.example.animedev20.ui.theme.domain.usecase.GetHomeContentUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

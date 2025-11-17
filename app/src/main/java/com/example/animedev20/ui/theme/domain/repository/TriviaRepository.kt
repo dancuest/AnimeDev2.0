@@ -1,8 +1,8 @@
-package com.example.animedev.domain.repository
+package com.example.animedev20.ui.theme.domain.repository
 
-import com.example.animedev.domain.model.Trivias.TriviaDifficulty
-import com.example.animedev.domain.model.Trivias.TriviaQuestion
-import com.example.animedev.domain.model.Trivias.TriviaSummary
+import com.example.animedev20.ui.theme.domain.model.Trivias.TriviaDifficulty
+import com.example.animedev20.ui.theme.domain.model.Trivias.TriviaQuestion
+import com.example.animedev20.ui.theme.domain.model.Trivias.TriviaSummary
 import kotlinx.coroutines.flow.Flow
 
 interface TriviaRepository {

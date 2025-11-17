@@ -1,6 +1,6 @@
-package com.example.animedev.feature.animeinfo.ui
+package com.example.animedev20.ui.theme.feature.animeinfo.ui
 
-import com.example.animedev.domain.model.AnimeDetail
+import com.example.animedev20.ui.theme.domain.model.AnimeDetail
 
 sealed class AnimeDetailUiState {
     object Loading : AnimeDetailUiState()

@@ -1,6 +1,6 @@
-package com.example.animedev.feature.home.ui
+package com.example.animedev20.ui.theme.feature.home.ui
 
-import com.example.animedev.domain.model.HomeContent
+import com.example.animedev20.ui.theme.domain.model.HomeContent
 
 sealed interface HomeUiState {
     object Loading : HomeUiState

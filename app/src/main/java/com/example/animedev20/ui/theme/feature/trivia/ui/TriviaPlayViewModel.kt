@@ -1,16 +1,16 @@
-package com.example.animedev.feature.trivia.ui
+package com.example.animedev20.ui.theme.feature.trivia.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.animedev.data.repository.FakeAnimeRepositoryImpl
-import com.example.animedev.data.repository.FakeTriviaRepositoryImpl
-import com.example.animedev.domain.model.Anime
-import com.example.animedev.domain.model.Trivias.TriviaDifficulty
-import com.example.animedev.domain.model.Trivias.TriviaQuestion
-import com.example.animedev.domain.repository.AnimeRepository
-import com.example.animedev.domain.repository.TriviaRepository
-import com.example.animedev.domain.usecase.GetAnimeDetailUseCase
+import com.example.animedev20.ui.theme.data.repository.FakeAnimeRepositoryImpl
+import com.example.animedev20.ui.theme.data.repository.FakeTriviaRepositoryImpl
+import com.example.animedev20.ui.theme.domain.model.Anime
+import com.example.animedev20.ui.theme.domain.model.Trivias.TriviaDifficulty
+import com.example.animedev20.ui.theme.domain.model.Trivias.TriviaQuestion
+import com.example.animedev20.ui.theme.domain.repository.AnimeRepository
+import com.example.animedev20.ui.theme.domain.repository.TriviaRepository
+import com.example.animedev20.ui.theme.domain.usecase.GetAnimeDetailUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -54,7 +54,8 @@ class TriviaPlayViewModel(
             val result = getAnimeDetailUseCase(animeId)
             result.fold(
                 onSuccess = { detail ->
-                    _uiState.value = TriviaPlayUiState.Success(TriviaPlayState(anime = detail.anime))
+                    _uiState.value =
+                        TriviaPlayUiState.Success(TriviaPlayState(anime = detail.anime))
                 },
                 onFailure = { throwable ->
                     _uiState.value = TriviaPlayUiState.Error(

@@ -80,6 +80,7 @@ fun AnimeDetailScreen(
             onRetry = viewModel::loadAnimeDetail,
             onBack = onBack
         )
+
         is AnimeDetailUiState.Success -> AnimeDetailContent(
             detail = state.detail,
             isFavorite = state.isFavorite,
@@ -120,7 +121,8 @@ private fun AnimeDetailContent(
             ExtendedFloatingActionButton(
                 onClick = onFavoriteToggle,
                 icon = {
-                    val icon = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder
+                    val icon =
+                        if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder
                     val contentDescription = if (isFavorite) {
                         "Eliminar de favoritos"
                     } else {
@@ -293,7 +295,11 @@ private fun AnimeStats(anime: Anime) {
 @Composable
 private fun RowOfStats(label: String, value: String) {
     Column(modifier = Modifier.padding(vertical = 4.dp)) {
-        Text(text = label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
         Text(text = value, style = MaterialTheme.typography.bodyLarge)
     }
 }

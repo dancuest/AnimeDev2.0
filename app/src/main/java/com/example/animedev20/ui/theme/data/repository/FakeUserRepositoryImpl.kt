@@ -1,8 +1,8 @@
-package com.example.animedev.data.repository
+package com.example.animedev20.ui.theme.data.repository
 
-import com.example.animedev.data.FakeDataSource
-import com.example.animedev.domain.model.Genre
-import com.example.animedev.domain.repository.UserRepository
+import com.example.animedev20.ui.theme.data.FakeDataSource
+import com.example.animedev20.ui.theme.domain.model.Genre
+import com.example.animedev20.ui.theme.domain.repository.UserRepository
 import kotlinx.coroutines.delay
 
 class FakeUserRepositoryImpl : UserRepository {

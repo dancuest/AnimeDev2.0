@@ -1,4 +1,4 @@
-package com.example.animedev.ui.theme
+package com.example.animedev20.ui.theme.theme
 
 import androidx.compose.ui.graphics.Color
 

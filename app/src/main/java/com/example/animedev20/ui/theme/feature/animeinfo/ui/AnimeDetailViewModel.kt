@@ -1,12 +1,12 @@
-package com.example.animedev.feature.animeinfo.ui
+package com.example.animedev20.ui.theme.feature.animeinfo.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.animedev.data.repository.FakeAnimeRepositoryImpl
-import com.example.animedev.data.repository.FakeFavoritesRepositoryImpl
-import com.example.animedev.domain.repository.FavoritesRepository
-import com.example.animedev.domain.usecase.GetAnimeDetailUseCase
+import com.example.animedev20.ui.theme.data.repository.FakeAnimeRepositoryImpl
+import com.example.animedev20.ui.theme.data.repository.FakeFavoritesRepositoryImpl
+import com.example.animedev20.ui.theme.domain.repository.FavoritesRepository
+import com.example.animedev20.ui.theme.domain.usecase.GetAnimeDetailUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

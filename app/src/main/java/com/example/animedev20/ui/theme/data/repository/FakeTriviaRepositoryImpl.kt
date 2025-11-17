@@ -1,13 +1,14 @@
-package com.example.animedev.data.repository
+package com.example.animedev20.ui.theme.data.repository
 
-import com.example.animedev.data.FakeDataSource
-import com.example.animedev.domain.model.Anime
-import com.example.animedev.domain.model.DurationType
-import com.example.animedev.domain.model.EmissionStatus
-import com.example.animedev.domain.model.Trivias.TriviaDifficulty
-import com.example.animedev.domain.model.Trivias.TriviaQuestion
-import com.example.animedev.domain.model.Trivias.TriviaSummary
-import com.example.animedev.domain.repository.TriviaRepository
+
+import com.example.animedev20.ui.theme.data.FakeDataSource
+import com.example.animedev20.ui.theme.domain.model.Anime
+import com.example.animedev20.ui.theme.domain.model.DurationType
+import com.example.animedev20.ui.theme.domain.model.EmissionStatus
+import com.example.animedev20.ui.theme.domain.model.Trivias.TriviaDifficulty
+import com.example.animedev20.ui.theme.domain.model.Trivias.TriviaQuestion
+import com.example.animedev20.ui.theme.domain.model.Trivias.TriviaSummary
+import com.example.animedev20.ui.theme.domain.repository.TriviaRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -94,37 +95,61 @@ object FakeTriviaRepositoryImpl : TriviaRepository {
         1L to CulturalTraditionMoment(
             context = "cuando Tanjiro recuerda la Danza del Dios del Fuego",
             correctConcept = "una danza kagura dedicada a los kami",
-            distractors = listOf("un matsuri de verano", "una ceremonia del té", "una ofrenda de hanami"),
+            distractors = listOf(
+                "un matsuri de verano",
+                "una ceremonia del té",
+                "una ofrenda de hanami"
+            ),
             detail = "El Kagura del Dios del Fuego es una danza ritual que honra a los espíritus"
         ),
         2L to CulturalTraditionMoment(
             context = "cuando los guerreros comparten historias alrededor del fuego",
             correctConcept = "un cuento yorishiro para invocar protección",
-            distractors = listOf("una práctica de sumo", "un desfile de Tanabata", "un entrenamiento de kendo"),
+            distractors = listOf(
+                "una práctica de sumo",
+                "un desfile de Tanabata",
+                "un entrenamiento de kendo"
+            ),
             detail = "Los yorishiro simbolizan objetos que atraen a los kami para resguardar a los presentes"
         ),
         3L to CulturalTraditionMoment(
             context = "en las festividades que los exploradores recrean antes de descender",
             correctConcept = "un pequeño matsuri dedicado a desear buena fortuna",
-            distractors = listOf("una ceremonia nupcial", "una reunión hanami", "una subasta de mercado negro"),
+            distractors = listOf(
+                "una ceremonia nupcial",
+                "una reunión hanami",
+                "una subasta de mercado negro"
+            ),
             detail = "Los matsuri se celebran para pedir protección y prosperidad a los dioses locales"
         ),
         4L to CulturalTraditionMoment(
             context = "cuando los estudiantes visitan Kyoto para el torneo escolar",
             correctConcept = "una ofrenda en un santuario sintoísta",
-            distractors = listOf("una iniciación ninja", "una procesión budista", "un festival de nieve"),
+            distractors = listOf(
+                "una iniciación ninja",
+                "una procesión budista",
+                "un festival de nieve"
+            ),
             detail = "El arco de Kyoto muestra las plegarias en templos y ofrendas omikuji por la buena suerte"
         ),
         5L to CulturalTraditionMoment(
             context = "cuando Tenma recuerda las reuniones familiares en Japón",
             correctConcept = "una ceremonia del té para honrar a los invitados",
-            distractors = listOf("un ritual de kagura", "un festival Nebuta", "un acto de teatro kabuki"),
+            distractors = listOf(
+                "un ritual de kagura",
+                "un festival Nebuta",
+                "un acto de teatro kabuki"
+            ),
             detail = "La ceremonia del té enfatiza la armonía, el respeto y la calma que Tenma añora"
         ),
         6L to CulturalTraditionMoment(
             context = "cuando los hermanos Elric observan los talismanes de Ishval",
             correctConcept = "un omamori utilizado como amuleto de protección",
-            distractors = listOf("un adorno de bonsái", "un pergamino emakimono", "un instrumento shamisen"),
+            distractors = listOf(
+                "un adorno de bonsái",
+                "un pergamino emakimono",
+                "un instrumento shamisen"
+            ),
             detail = "Los omamori se consiguen en templos y se usan para desear seguridad en los viajes"
         )
     )
@@ -132,7 +157,11 @@ object FakeTriviaRepositoryImpl : TriviaRepository {
     private val defaultTradition = CulturalTraditionMoment(
         context = "cuando los héroes hacen una pausa para agradecer",
         correctConcept = "un ritual sintoísta para pedir protección",
-        distractors = listOf("una clase de caligrafía", "una demostración de karate", "un concurso gastronómico"),
+        distractors = listOf(
+            "una clase de caligrafía",
+            "una demostración de karate",
+            "un concurso gastronómico"
+        ),
         detail = "Muchos animes muestran escenas donde los personajes siguen costumbres sintoístas cotidianas"
     )
 
@@ -157,7 +186,8 @@ object FakeTriviaRepositoryImpl : TriviaRepository {
     override suspend fun getQuestions(
         animeId: Long,
         difficulty: TriviaDifficulty
-    ): List<TriviaQuestion> {
+    ): List<TriviaQuestion>
+    {
         delay(400)
         val questionsByDifficulty = questionBank[animeId]
             ?: error("No hay trivias disponibles para el anime con id $animeId")
@@ -192,7 +222,7 @@ object FakeTriviaRepositoryImpl : TriviaRepository {
                 buildCulturalTraditionQuestion(anime),
                 buildReleaseYearQuestion(anime),
                 buildEpisodesQuestion(anime),
-             ),
+            ),
             TriviaDifficulty.HARD to listOf(
                 buildStatementQuestion(anime),
                 buildMissingGenreQuestion(anime),
@@ -224,7 +254,9 @@ object FakeTriviaRepositoryImpl : TriviaRepository {
             question = "¿Cuál es el estado de emisión actual de ${anime.title}?",
             options = options,
             correctAnswerIndex = correctIndex,
-            feedback = "Actualmente la serie se encuentra ${anime.emissionStatus.toReadableText().lowercase()}"
+            feedback = "Actualmente la serie se encuentra ${
+                anime.emissionStatus.toReadableText().lowercase()
+            }"
         )
     }
 
@@ -320,7 +352,8 @@ object FakeTriviaRepositoryImpl : TriviaRepository {
 
     private fun buildMissingGenreQuestion(anime: Anime): TriviaQuestion {
         val availableGenres = anime.genres.map { it.name }
-        val extraGenre = FakeDataSource.genres.firstOrNull { it.name !in availableGenres }?.name ?: "Comedia"
+        val extraGenre =
+            FakeDataSource.genres.firstOrNull { it.name !in availableGenres }?.name ?: "Comedia"
         val options = (availableGenres + extraGenre).shuffled()
         val correctIndex = options.indexOf(extraGenre)
         return TriviaQuestion(

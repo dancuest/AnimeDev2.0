@@ -1,5 +1,4 @@
-
-package com.example.animedev.feature.profile.ui
+package com.example.animedev20.ui.theme.feature.profile.ui
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable

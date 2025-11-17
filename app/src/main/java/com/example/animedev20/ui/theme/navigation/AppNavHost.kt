@@ -21,7 +21,11 @@ fun AppNavHost(
     navController: NavHostController,
     modifier: Modifier
 ) {
-    NavHost(navController = navController, startDestination = Screen.Home.route, modifier = modifier) {
+    NavHost(
+        navController = navController,
+        startDestination = Screen.Home.route,
+        modifier = modifier
+    ) {
         composable(Screen.Home.route) {
             HomeScreen(onAnimeSelected = { animeId ->
                 navController.navigate(Screen.AnimeDetail.createRoute(animeId))

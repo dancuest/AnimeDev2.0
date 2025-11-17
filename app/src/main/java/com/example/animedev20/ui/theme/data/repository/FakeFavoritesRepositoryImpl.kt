@@ -1,16 +1,16 @@
-package com.example.animedev.data.repository
+package com.example.animedev20.ui.theme.data.repository
 
-import com.example.animedev.domain.model.Anime
-import com.example.animedev.domain.repository.FavoritesRepository
+import com.example.animedev20.ui.theme.domain.model.Anime
+import com.example.animedev20.ui.theme.domain.repository.FavoritesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
-/**
- * Repositorio en memoria que simula el almacenamiento persistente de favoritos.
- * Al ser un [object], comparte el mismo estado entre pantallas para esta demo.
+/**␊
+ * Repositorio en memoria que simula el almacenamiento persistente de favoritos.␊
+ * Al ser un [object], comparte el mismo estado entre pantallas para esta demo.␊
  */
 object FakeFavoritesRepositoryImpl : FavoritesRepository {
 
@@ -38,7 +38,7 @@ object FakeFavoritesRepositoryImpl : FavoritesRepository {
     }
 
     override fun isFavorite(animeId: Long): Flow<Boolean> =
-        favoriteAnimes
-            .map { list -> list.any { it.id == animeId } }
-            .distinctUntilChanged()
+    favoriteAnimes
+    .map { list -> list.any { it.id == animeId } }
+    .distinctUntilChanged()
 }

@@ -1,7 +1,7 @@
-package com.example.animedev.domain.repository
+package com.example.animedev20.ui.theme.domain.repository
 
-import com.example.animedev.domain.model.Anime
-import com.example.animedev.domain.model.AnimeDetail
+import com.example.animedev20.ui.theme.domain.model.Anime
+import com.example.animedev20.ui.theme.domain.model.AnimeDetail
 
 interface AnimeRepository {
     suspend fun getHeroRecommendation(): Anime

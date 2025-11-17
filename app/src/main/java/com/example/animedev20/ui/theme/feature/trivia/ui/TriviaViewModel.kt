@@ -1,11 +1,11 @@
-package com.example.animedev.feature.trivia.ui
+package com.example.animedev20.ui.theme.feature.trivia.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.animedev.data.repository.FakeTriviaRepositoryImpl
-import com.example.animedev.domain.model.Trivias.TriviaSummary
-import com.example.animedev.domain.repository.TriviaRepository
+import com.example.animedev20.ui.theme.data.repository.FakeTriviaRepositoryImpl
+import com.example.animedev20.ui.theme.domain.model.Trivias.TriviaSummary
+import com.example.animedev20.ui.theme.domain.repository.TriviaRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

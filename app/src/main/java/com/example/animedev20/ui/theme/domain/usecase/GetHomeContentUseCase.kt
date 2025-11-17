@@ -1,9 +1,9 @@
-package com.example.animedev.domain.usecase
+package com.example.animedev20.ui.theme.domain.usecase
 
-import com.example.animedev.domain.model.AnimeSection
-import com.example.animedev.domain.model.HomeContent
-import com.example.animedev.domain.repository.AnimeRepository
-import com.example.animedev.domain.repository.UserRepository
+import com.example.animedev20.ui.theme.domain.model.AnimeSection
+import com.example.animedev20.ui.theme.domain.model.HomeContent
+import com.example.animedev20.ui.theme.domain.repository.AnimeRepository
+import com.example.animedev20.ui.theme.domain.repository.UserRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 

@@ -139,7 +139,7 @@ private fun SettingsContent(
                 }
             }
             Text(
-                text = "Podrás cambiar estas categorías en cualquier momento desde aquí o desde tu perfil.",
+                text = "Podrás cambiar estas categorías en cualquier momento desde aquí.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)

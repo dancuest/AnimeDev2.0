@@ -48,8 +48,6 @@ import coil.compose.AsyncImage
 import com.example.animedev20.ui.theme.data.FakeDataSource
 import com.example.animedev20.ui.theme.domain.model.Anime
 import com.example.animedev20.ui.theme.domain.model.DurationType
-import com.example.animedev20.ui.theme.domain.model.TriviaProfileStats
-import com.example.animedev20.ui.theme.domain.model.Trivias.TriviaDifficulty
 import com.example.animedev20.ui.theme.domain.model.UserProfile
 import com.example.animedev20.ui.theme.theme.AnimeDevTheme
 
@@ -69,8 +67,7 @@ fun ProfileScreen(
 
         profile != null -> ProfileContent(
             profile = profile,
-            recentAnimes = uiState.recentAnimes,
-            triviaStats = uiState.triviaStats
+            recentAnimes = uiState.recentAnimes
         )
     }
 }
@@ -105,8 +102,7 @@ private fun ProfileErrorState(message: String?, onRetry: () -> Unit) {
 @Composable
 private fun ProfileContent(
     profile: UserProfile,
-    recentAnimes: List<Anime>,
-    triviaStats: TriviaProfileStats
+    recentAnimes: List<Anime>
 ) {
     LazyColumn(
         modifier = Modifier
@@ -144,32 +140,6 @@ private fun ProfileContent(
                     label = { Text(durationPreferenceLabel(profile.preferredDuration)) }
                 )
             }
-            Text(
-                text = profile.biography,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
-            )
-        }
-        item {
-            SectionTitle(title = "Insignias culturales")
-            FlowRow(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                profile.badges.forEach { badge ->
-                    AssistChip(
-                        onClick = {},
-                        label = { Text(badge) }
-                    )
-                }
-            }
-        }
-        item {
-            SectionTitle(title = "Resumen de trivias")
-            TriviaSummaryCard(triviaStats = triviaStats)
         }
         if (recentAnimes.isNotEmpty()) {
             item {
@@ -253,7 +223,6 @@ private fun ProfileStatsRow(profile: UserProfile) {
     }
 }
 
-
 @Composable
 private fun ProfileStatCard(title: String, value: String, modifier: Modifier = Modifier) {
     Card(
@@ -274,42 +243,6 @@ private fun ProfileStatCard(title: String, value: String, modifier: Modifier = M
                 style = MaterialTheme.typography.bodySmall,
                 textAlign = TextAlign.Center
             )
-        }
-    }
-}
-
-@Composable
-private fun TriviaSummaryCard(triviaStats: TriviaProfileStats) {
-    Card(
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = "${triviaStats.totalAnswered} preguntas respondidas",
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text(
-                text = "${triviaStats.perfectRuns} trivias perfectas",
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Text(
-                text = "Nivel de maestría: ${triviaStats.masteryLevel}",
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            TriviaDifficulty.values().forEach { difficulty ->
-                val score = triviaStats.scoresByDifficulty[difficulty] ?: 0
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(text = difficulty.name.lowercase().replaceFirstChar { it.titlecase() })
-                    Text(text = "$score pts")
-                }
-            }
         }
     }
 }
@@ -363,8 +296,7 @@ private fun ProfileScreenPreview() {
         Surface {
             ProfileContent(
                 profile = FakeDataSource.defaultUserProfile,
-                recentAnimes = FakeDataSource.recentAnimeHistory,
-                triviaStats = FakeDataSource.defaultTriviaStats
+                recentAnimes = FakeDataSource.recentAnimeHistory
             )
         }
     }

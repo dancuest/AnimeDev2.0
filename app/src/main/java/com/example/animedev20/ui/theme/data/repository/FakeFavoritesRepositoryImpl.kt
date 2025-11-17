@@ -8,10 +8,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
-/**␊
- * Repositorio en memoria que simula el almacenamiento persistente de favoritos.␊
- * Al ser un [object], comparte el mismo estado entre pantallas para esta demo.␊
- */
 object FakeFavoritesRepositoryImpl : FavoritesRepository {
 
     private val favoriteAnimes = MutableStateFlow<List<Anime>>(emptyList())

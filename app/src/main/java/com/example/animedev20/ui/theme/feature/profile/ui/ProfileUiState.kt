@@ -5,9 +5,6 @@ import com.example.animedev20.ui.theme.domain.model.Anime
 import com.example.animedev20.ui.theme.domain.model.TriviaProfileStats
 import com.example.animedev20.ui.theme.domain.model.UserProfile
 
-/**
- * Represents the full UI state for the profile screen.
- */
 data class ProfileUiState(
     val isLoading: Boolean = true,
     val profile: UserProfile? = null,

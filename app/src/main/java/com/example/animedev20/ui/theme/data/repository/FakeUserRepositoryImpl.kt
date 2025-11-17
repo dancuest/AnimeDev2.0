@@ -7,7 +7,7 @@ import com.example.animedev20.ui.theme.domain.model.UserSettings
 import com.example.animedev20.ui.theme.domain.repository.UserRepository
 import kotlinx.coroutines.delay
 
-class FakeUserRepositoryImpl : UserRepository {
+object FakeUserRepositoryImpl : UserRepository {
 
     private var cachedSettings: UserSettings = FakeDataSource.defaultUserSettings
     private var cachedProfile: UserProfile = FakeDataSource.defaultUserProfile

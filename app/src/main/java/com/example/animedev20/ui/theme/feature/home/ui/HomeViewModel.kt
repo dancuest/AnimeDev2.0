@@ -45,7 +45,7 @@ class HomeViewModel(
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 if (modelClass.isAssignableFrom(HomeViewModel::class.java)) {
                     val animeRepository = FakeAnimeRepositoryImpl()
-                    val userRepository = FakeUserRepositoryImpl()
+                    val userRepository = FakeUserRepositoryImpl
                     val useCase = GetHomeContentUseCase(animeRepository, userRepository)
                     return HomeViewModel(useCase) as T
                 }

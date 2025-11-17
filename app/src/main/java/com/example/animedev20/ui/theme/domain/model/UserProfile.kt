@@ -24,10 +24,7 @@ data class UserSettings(
     val preferredDuration: DurationType,
     val notificationsEnabled: Boolean,
     val culturalAlertsEnabled: Boolean,
-    val triviaRemindersEnabled: Boolean,
-    val downloadOnlyOnWifi: Boolean,
-    val autoplayNextEpisode: Boolean,
-    val publicProfile: Boolean
+    val autoplayNextEpisode: Boolean
 )
 
 data class TriviaProfileStats(

@@ -45,10 +45,7 @@ class SettingsViewModel(
                         preferredDuration = settings.preferredDuration,
                         notificationsEnabled = settings.notificationsEnabled,
                         culturalAlertsEnabled = settings.culturalAlertsEnabled,
-                        triviaRemindersEnabled = settings.triviaRemindersEnabled,
-                        downloadOnlyOnWifi = settings.downloadOnlyOnWifi,
                         autoplayNextEpisode = settings.autoplayNextEpisode,
-                        publicProfile = settings.publicProfile,
                         name = profile.name,
                         email = profile.email,
                         nickname = profile.nickname,
@@ -87,20 +84,8 @@ class SettingsViewModel(
         _uiState.update { it.copy(culturalAlertsEnabled = enabled) }
     }
 
-    fun onTriviaAlertsToggled(enabled: Boolean) {
-        _uiState.update { it.copy(triviaRemindersEnabled = enabled) }
-    }
-
-    fun onWifiOnlyToggled(enabled: Boolean) {
-        _uiState.update { it.copy(downloadOnlyOnWifi = enabled) }
-    }
-
     fun onAutoplayToggled(enabled: Boolean) {
         _uiState.update { it.copy(autoplayNextEpisode = enabled) }
-    }
-
-    fun onPublicProfileToggled(enabled: Boolean) {
-        _uiState.update { it.copy(publicProfile = enabled) }
     }
 
     fun onNameChanged(value: String) {
@@ -125,10 +110,7 @@ class SettingsViewModel(
                 preferredDuration = state.preferredDuration,
                 notificationsEnabled = state.notificationsEnabled,
                 culturalAlertsEnabled = state.culturalAlertsEnabled,
-                triviaRemindersEnabled = state.triviaRemindersEnabled,
-                downloadOnlyOnWifi = state.downloadOnlyOnWifi,
-                autoplayNextEpisode = state.autoplayNextEpisode,
-                publicProfile = state.publicProfile
+                autoplayNextEpisode = state.autoplayNextEpisode
             )
             runCatching { userRepository.updateUserSettings(settings) }
                 .onSuccess {
@@ -149,9 +131,14 @@ class SettingsViewModel(
             val state = _uiState.value
             runCatching {
                 userRepository.updateAccountInfo(state.name, state.email, state.nickname)
-            }.onSuccess {
+            }.onSuccess { updatedProfile ->
                 _uiState.update { current ->
-                    current.copy(message = "Perfil actualizado correctamente")
+                    current.copy(
+                        message = "Perfil actualizado correctamente",
+                        name = updatedProfile.name,
+                        email = updatedProfile.email,
+                        nickname = updatedProfile.nickname
+                    )
                 }
             }.onFailure { error ->
                 _uiState.update { current ->
@@ -170,7 +157,7 @@ class SettingsViewModel(
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
-                    return SettingsViewModel(FakeUserRepositoryImpl()) as T
+                    return SettingsViewModel(FakeUserRepositoryImpl) as T
                 }
                 throw IllegalArgumentException("Unknown ViewModel class")
             }
@@ -185,10 +172,7 @@ data class SettingsUiState(
     val preferredDuration: DurationType = DurationType.MEDIUM,
     val notificationsEnabled: Boolean = true,
     val culturalAlertsEnabled: Boolean = true,
-    val triviaRemindersEnabled: Boolean = true,
-    val downloadOnlyOnWifi: Boolean = true,
     val autoplayNextEpisode: Boolean = false,
-    val publicProfile: Boolean = true,
     val name: String = "",
     val email: String = "",
     val nickname: String = "",

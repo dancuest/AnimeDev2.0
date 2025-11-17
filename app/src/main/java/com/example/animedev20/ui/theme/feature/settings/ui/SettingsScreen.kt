@@ -11,10 +11,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -72,10 +71,7 @@ fun SettingsScreen(
                 onDurationSelected = viewModel::onDurationSelected,
                 onToggleNotifications = viewModel::onNotificationsToggled,
                 onToggleCulturalAlerts = viewModel::onCulturalAlertsToggled,
-                onToggleTriviaAlerts = viewModel::onTriviaAlertsToggled,
-                onToggleWifiOnly = viewModel::onWifiOnlyToggled,
                 onToggleAutoplay = viewModel::onAutoplayToggled,
-                onTogglePublicProfile = viewModel::onPublicProfileToggled,
                 onSavePreferences = viewModel::savePreferences,
                 onSaveAccountInfo = viewModel::saveAccountInfo,
                 onNameChange = viewModel::onNameChanged,
@@ -95,10 +91,7 @@ private fun SettingsContent(
     onDurationSelected: (DurationType) -> Unit,
     onToggleNotifications: (Boolean) -> Unit,
     onToggleCulturalAlerts: (Boolean) -> Unit,
-    onToggleTriviaAlerts: (Boolean) -> Unit,
-    onToggleWifiOnly: (Boolean) -> Unit,
     onToggleAutoplay: (Boolean) -> Unit,
-    onTogglePublicProfile: (Boolean) -> Unit,
     onSavePreferences: () -> Unit,
     onSaveAccountInfo: () -> Unit,
     onNameChange: (String) -> Unit,
@@ -172,7 +165,7 @@ private fun SettingsContent(
             }
         }
         item {
-            SettingSectionTitle(title = "Recordatorios y descargas")
+            SettingSectionTitle(title = "Alertas y reproducción")
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 SettingToggleRow(
                     title = "Notificaciones generales",
@@ -185,18 +178,6 @@ private fun SettingsContent(
                     description = "Recibe contexto histórico y gastronómico cuando agregues nuevos animes.",
                     checked = state.culturalAlertsEnabled,
                     onCheckedChange = onToggleCulturalAlerts
-                )
-                SettingToggleRow(
-                    title = "Recordatorios de trivias",
-                    description = "Te avisaremos cuando haya trivias nuevas o pendientes.",
-                    checked = state.triviaRemindersEnabled,
-                    onCheckedChange = onToggleTriviaAlerts
-                )
-                SettingToggleRow(
-                    title = "Descargar solo con Wi-Fi",
-                    description = "Evita el consumo de datos móviles al guardar episodios para más tarde.",
-                    checked = state.downloadOnlyOnWifi,
-                    onCheckedChange = onToggleWifiOnly
                 )
                 SettingToggleRow(
                     title = "Reproducción automática",
@@ -215,14 +196,8 @@ private fun SettingsContent(
             }
         }
         item {
-            SettingSectionTitle(title = "Privacidad y datos de perfil")
+            SettingSectionTitle(title = "Datos del perfil")
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                SettingToggleRow(
-                    title = "Perfil público",
-                    description = "Permite que otros vean tus logros, trivias y lista de favoritos.",
-                    checked = state.publicProfile,
-                    onCheckedChange = onTogglePublicProfile
-                )
                 Spacer(modifier = Modifier.height(16.dp))
                 OutlinedTextField(
                     value = state.name,
@@ -244,12 +219,6 @@ private fun SettingsContent(
                     label = { Text("Nombre público o nickname") },
                     modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Estos datos también podrán editarse cuando habilites el módulo de autenticación con Firebase.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
                 Button(
                     onClick = onSaveAccountInfo,
                     modifier = Modifier
@@ -259,26 +228,6 @@ private fun SettingsContent(
                     Text("Actualizar datos de perfil")
                 }
             }
-        }
-        item {
-            SettingSectionTitle(title = "Consejo educativo del día")
-            AssistChip(
-                onClick = {},
-                label = { Text("Aprende sobre festivales Obon y su impacto en el anime.") },
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .fillMaxWidth(),
-                leadingIcon = null,
-                colors = AssistChipDefaults.assistChipColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer
-                )
-            )
-            Text(
-                text = "Seguiremos agregando microlecciones para motivarte a explorar más culturas.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
-            )
         }
     }
 }
@@ -344,6 +293,7 @@ private fun DurationPreferenceChip(
 ) {
     Column(
         modifier = modifier
+            .heightIn(min = 176.dp)
             .background(
                 color = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
                 shape = MaterialTheme.shapes.medium
@@ -387,10 +337,7 @@ private fun SettingsContentPreview() {
                 preferredDuration = DurationType.MEDIUM,
                 notificationsEnabled = true,
                 culturalAlertsEnabled = true,
-                triviaRemindersEnabled = true,
-                downloadOnlyOnWifi = true,
                 autoplayNextEpisode = false,
-                publicProfile = true,
                 name = "Akira Morales",
                 email = "akira@animedev.io",
                 nickname = "OtakuSensei"
@@ -399,10 +346,7 @@ private fun SettingsContentPreview() {
             onDurationSelected = {},
             onToggleNotifications = {},
             onToggleCulturalAlerts = {},
-            onToggleTriviaAlerts = {},
-            onToggleWifiOnly = {},
             onToggleAutoplay = {},
-            onTogglePublicProfile = {},
             onSavePreferences = {},
             onSaveAccountInfo = {},
             onNameChange = {},

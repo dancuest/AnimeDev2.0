@@ -20,7 +20,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
@@ -30,7 +29,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -122,26 +120,7 @@ private fun ProfileContent(
         item {
             ProfileStatsRow(profile = profile)
         }
-        item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Button(onClick = { /* TODO: Hook edit flow */ }, modifier = Modifier.weight(1f)) {
-                    Icon(imageVector = Icons.Filled.Edit, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Editar perfil")
-                }
-                OutlinedButton(
-                    onClick = { /* TODO: Hook share flow */ },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text("Compartir progreso")
-                }
-            }
-        }
+
         item {
             SectionTitle(title = "Preferencias culturales")
             FlowRow(
@@ -205,24 +184,6 @@ private fun ProfileContent(
                 }
             }
         }
-        if (!profile.favoriteQuote.isNullOrBlank()) {
-            item {
-                SectionTitle(title = "Frase que te inspira")
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                ) {
-                    Text(
-                        text = profile.favoriteQuote!!,
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-            }
-        }
     }
 }
 
@@ -279,11 +240,19 @@ private fun ProfileStatsRow(profile: UserProfile) {
             .padding(horizontal = 16.dp, vertical = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        ProfileStatCard(title = "Animes vistos", value = profile.totalAnimesWatched.toString(), modifier = Modifier.weight(1f))
-        ProfileStatCard(title = "Trivias jugadas", value = profile.completedTrivias.toString(), modifier = Modifier.weight(1f))
-        ProfileStatCard(title = "Nivel cultural", value = profile.knowledgeLevel.split(" ").first(), modifier = Modifier.weight(1f))
+        ProfileStatCard(
+            title = "Animes vistos",
+            value = profile.totalAnimesWatched.toString(),
+            modifier = Modifier.weight(1f)
+        )
+        ProfileStatCard(
+            title = "Trivias jugadas",
+            value = profile.completedTrivias.toString(),
+            modifier = Modifier.weight(1f)
+        )
     }
 }
+
 
 @Composable
 private fun ProfileStatCard(title: String, value: String, modifier: Modifier = Modifier) {

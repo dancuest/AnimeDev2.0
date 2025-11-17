@@ -9,43 +9,50 @@ import com.example.animedev20.ui.theme.domain.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ProfileViewModel(
-                       private val userRepository: UserRepository
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
     init {
+        observeProfileUpdates()
         refresh()
     }
 
     fun refresh() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            runCatching { userRepository.getUserProfile() }
-                .onSuccess { profile ->
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            profile = profile,
-                            recentAnimes = FakeDataSource.recentAnimeHistory,
-                            triviaStats = FakeDataSource.defaultTriviaStats,
-                            errorMessage = null
-                        )
-                    }
+            try {
+                userRepository.getUserProfile()
+            } catch (error: Throwable) {
+                _uiState.update {
+                    it.copy(errorMessage = error.message ?: "No fue posible cargar el perfil")
                 }
-                .onFailure { error ->
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = error.message ?: "No fue posible cargar el perfil"
-                        )
-                    }
+            } finally {
+                _uiState.update { it.copy(isLoading = false) }
+            }
+        }
+    }
+
+    private fun observeProfileUpdates() {
+        viewModelScope.launch {
+            userRepository.observeUserProfile().collect { profile ->
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        profile = profile,
+                        recentAnimes = FakeDataSource.recentAnimeHistory,
+                        triviaStats = FakeDataSource.defaultTriviaStats,
+                        errorMessage = null
+                    )
                 }
+            }
         }
     }
 

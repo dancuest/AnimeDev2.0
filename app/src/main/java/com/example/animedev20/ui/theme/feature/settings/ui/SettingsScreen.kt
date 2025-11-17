@@ -308,7 +308,7 @@ private fun DurationPreferenceChip(
         )
         Spacer(modifier = Modifier.height(8.dp))
         Button(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
-            Text(if (selected) "Seleccionado" else "Elegir")
+            Text(if (selected) "Elegido" else "Elegir")
         }
     }
 }

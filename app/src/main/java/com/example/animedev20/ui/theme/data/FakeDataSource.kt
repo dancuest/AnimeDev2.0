@@ -7,9 +7,11 @@ import com.example.animedev20.ui.theme.domain.model.DurationType
 import com.example.animedev20.ui.theme.domain.model.EmissionStatus
 import com.example.animedev20.ui.theme.domain.model.Episode
 import com.example.animedev20.ui.theme.domain.model.Genre
-/**
- * Fuente de datos temporal para simular la respuesta de un backend real.
- */
+import com.example.animedev20.ui.theme.domain.model.TriviaProfileStats
+import com.example.animedev20.ui.theme.domain.model.UserProfile
+import com.example.animedev20.ui.theme.domain.model.UserSettings
+import com.example.animedev20.ui.theme.domain.model.Trivias.TriviaDifficulty
+
 object FakeDataSource {
     val shonen = Genre(id = "1", name = "Shonen")
     val seinen = Genre(id = "2", name = "Seinen")
@@ -108,6 +110,51 @@ object FakeDataSource {
 
     val preferredGenres: List<Genre> = listOf(shonen, aventura, seinen)
 
+    val defaultUserSettings = UserSettings(
+        preferredGenres = preferredGenres,
+        preferredDuration = DurationType.MEDIUM,
+        notificationsEnabled = true,
+        culturalAlertsEnabled = true,
+        triviaRemindersEnabled = true,
+        downloadOnlyOnWifi = true,
+        autoplayNextEpisode = false,
+        publicProfile = true
+    )
+
+    val defaultUserProfile = UserProfile(
+        id = "user-001",
+        name = "Akira Morales",
+        nickname = "OtakuSensei",
+        email = "akira@animedev.io",
+        avatarUrl = "https://cdn.myanimelist.net/images/characters/7/284193.jpg",
+        knowledgeLevel = "Explorador Cultural",
+        xpPoints = 1280,
+        biography = "Apasionado por descubrir las referencias históricas y gastronómicas escondidas en cada anime.",
+        totalAnimesWatched = 42,
+        completedTrivias = 18,
+        preferredDuration = defaultUserSettings.preferredDuration,
+        favoriteGenres = preferredGenres,
+        badges = listOf(
+            "Embajador del Shonen",
+            "Guardián de los Matsuri",
+            "Catador de Onigiris"
+        ),
+        favoriteQuote = "Cada episodio es una ventana a otra cultura."
+    )
+
+    val defaultTriviaStats = TriviaProfileStats(
+        totalAnswered = 120,
+        perfectRuns = 7,
+        masteryLevel = "Sage del Anime",
+        scoresByDifficulty = mapOf(
+            TriviaDifficulty.EASY to 95,
+            TriviaDifficulty.MEDIUM to 82,
+            TriviaDifficulty.HARD to 68
+        )
+    )
+
+    val recentAnimeHistory: List<Anime> = animeCatalog.take(4)
+
     fun buildSectionsForGenres(genres: List<Genre>): List<AnimeSection> =
         genres.map { genre ->
             AnimeSection(
@@ -117,6 +164,7 @@ object FakeDataSource {
                 }
             )
         }
+
     fun getAnimeDetail(animeId: Long): AnimeDetail {
         val anime = animeCatalog.firstOrNull { it.id == animeId }
             ?: error("Anime con id $animeId no encontrado")

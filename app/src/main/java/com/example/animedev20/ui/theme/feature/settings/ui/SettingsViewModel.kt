@@ -174,7 +174,7 @@ data class SettingsUiState(
     val preferredDuration: DurationType = DurationType.MEDIUM,
     val notificationsEnabled: Boolean = true,
     val culturalAlertsEnabled: Boolean = true,
-    val autoplayNextEpisode: Boolean = false,
+    val autoplayNextEpisode: Boolean = true,
     val hasCompletedOnboarding: Boolean = false,
     val name: String = "",
     val email: String = "",

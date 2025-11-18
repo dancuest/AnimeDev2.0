@@ -168,7 +168,9 @@ fun OnboardingPreferencesScreen(
                             }
                             Button(
                                 onClick = onContinue,
-                                enabled = state.selectedGenres.isNotEmpty() && !state.isSaving,
+                                enabled = state.selectedGenres.isNotEmpty() &&
+                                        state.preferredDuration != null &&
+                                        !state.isSaving,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 if (state.isSaving) {
@@ -307,8 +309,8 @@ private fun OnboardingPreferencesPreview() {
             state = OnboardingPreferencesUiState(
                 isLoading = false,
                 availableGenres = FakeDataSource.genres,
-                selectedGenres = FakeDataSource.preferredGenres.map { it.id }.toSet(),
-                preferredDuration = DurationType.MEDIUM
+                selectedGenres = emptySet(),
+                preferredDuration = null
             ),
             onGenreSelected = {},
             onDurationSelected = {},

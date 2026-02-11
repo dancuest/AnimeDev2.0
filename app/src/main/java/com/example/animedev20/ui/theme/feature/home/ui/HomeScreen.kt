@@ -75,7 +75,7 @@ private fun HomeSuccessContent(
     ) {
         item {
             Text(
-                text = "Hola, otaku 👋",
+                text = "Empezemos a entretenernos juntos",
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
             )

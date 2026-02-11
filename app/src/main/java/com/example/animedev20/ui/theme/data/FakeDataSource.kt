@@ -115,7 +115,7 @@ object FakeDataSource {
         preferredDuration = DurationType.MEDIUM,
         notificationsEnabled = true,
         culturalAlertsEnabled = true,
-        autoplayNextEpisode = false,
+        autoplayNextEpisode = true,
         hasCompletedOnboarding = false
     )
 
@@ -137,7 +137,7 @@ object FakeDataSource {
             "Guardián de los Matsuri",
             "Catador de Onigiris"
         ),
-        favoriteQuote = "Cada episodio es una ventana a otra cultura."
+        favoriteQuote = ""
     )
 
     val defaultTriviaStats = TriviaProfileStats(

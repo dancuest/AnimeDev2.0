@@ -337,7 +337,7 @@ private fun SettingsContentPreview() {
                 preferredDuration = DurationType.MEDIUM,
                 notificationsEnabled = true,
                 culturalAlertsEnabled = true,
-                autoplayNextEpisode = false,
+                autoplayNextEpisode = true,
                 hasCompletedOnboarding = true,
                 name = "Akira Morales",
                 email = "akira@animedev.io",

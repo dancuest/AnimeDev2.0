@@ -35,15 +35,24 @@ class OnboardingPreferencesViewModel(
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             runCatching { userRepository.getUserSettings() }
                 .onSuccess { settings ->
+                    val shouldPrefill = settings.hasCompletedOnboarding
                     _uiState.update {
                         it.copy(
                             isLoading = false,
                             availableGenres = FakeDataSource.genres,
-                            selectedGenres = settings.preferredGenres.map(Genre::id).toSet(),
-                            preferredDuration = settings.preferredDuration,
+                            selectedGenres = if (shouldPrefill) {
+                                settings.preferredGenres.map(Genre::id).toSet()
+                            } else {
+                                emptySet()
+                            },
+                            preferredDuration = if (shouldPrefill) settings.preferredDuration else null,
                             notificationsEnabled = settings.notificationsEnabled,
                             culturalAlertsEnabled = settings.culturalAlertsEnabled,
-                            autoplayNextEpisode = settings.autoplayNextEpisode,
+                            autoplayNextEpisode = if (shouldPrefill) {
+                                settings.autoplayNextEpisode
+                            } else {
+                                true
+                            },
                             hasCompletedOnboarding = settings.hasCompletedOnboarding,
                             errorMessage = null
                         )
@@ -76,7 +85,8 @@ class OnboardingPreferencesViewModel(
 
     fun onContinue() {
         val currentState = _uiState.value
-        if (currentState.selectedGenres.isEmpty() || currentState.isSaving) return
+        if (currentState.isSaving || currentState.selectedGenres.isEmpty()) return
+        val preferredDuration = currentState.preferredDuration ?: return
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true, errorMessage = null) }
             val selectedGenres = FakeDataSource.genres.filter { genre ->
@@ -84,7 +94,7 @@ class OnboardingPreferencesViewModel(
             }
             val settings = UserSettings(
                 preferredGenres = selectedGenres,
-                preferredDuration = currentState.preferredDuration,
+                preferredDuration = preferredDuration,
                 notificationsEnabled = currentState.notificationsEnabled,
                 culturalAlertsEnabled = currentState.culturalAlertsEnabled,
                 autoplayNextEpisode = currentState.autoplayNextEpisode,
@@ -123,10 +133,10 @@ data class OnboardingPreferencesUiState(
     val isLoading: Boolean = true,
     val availableGenres: List<Genre> = emptyList(),
     val selectedGenres: Set<String> = emptySet(),
-    val preferredDuration: DurationType = DurationType.MEDIUM,
+    val preferredDuration: DurationType? = null,
     val notificationsEnabled: Boolean = true,
     val culturalAlertsEnabled: Boolean = true,
-    val autoplayNextEpisode: Boolean = false,
+    val autoplayNextEpisode: Boolean = true,
     val hasCompletedOnboarding: Boolean = false,
     val isSaving: Boolean = false,
     val errorMessage: String? = null,

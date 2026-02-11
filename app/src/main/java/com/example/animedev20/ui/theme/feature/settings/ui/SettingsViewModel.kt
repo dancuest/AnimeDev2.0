@@ -46,6 +46,7 @@ class SettingsViewModel(
                         notificationsEnabled = settings.notificationsEnabled,
                         culturalAlertsEnabled = settings.culturalAlertsEnabled,
                         autoplayNextEpisode = settings.autoplayNextEpisode,
+                        hasCompletedOnboarding = settings.hasCompletedOnboarding,
                         name = profile.name,
                         email = profile.email,
                         nickname = profile.nickname,
@@ -110,7 +111,8 @@ class SettingsViewModel(
                 preferredDuration = state.preferredDuration,
                 notificationsEnabled = state.notificationsEnabled,
                 culturalAlertsEnabled = state.culturalAlertsEnabled,
-                autoplayNextEpisode = state.autoplayNextEpisode
+                autoplayNextEpisode = state.autoplayNextEpisode,
+                hasCompletedOnboarding = state.hasCompletedOnboarding
             )
             runCatching { userRepository.updateUserSettings(settings) }
                 .onSuccess {
@@ -173,6 +175,7 @@ data class SettingsUiState(
     val notificationsEnabled: Boolean = true,
     val culturalAlertsEnabled: Boolean = true,
     val autoplayNextEpisode: Boolean = false,
+    val hasCompletedOnboarding: Boolean = false,
     val name: String = "",
     val email: String = "",
     val nickname: String = "",

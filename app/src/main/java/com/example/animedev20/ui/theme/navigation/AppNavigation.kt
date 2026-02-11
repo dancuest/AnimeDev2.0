@@ -14,6 +14,7 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
     object Trivia : Screen("trivia", "Trivias", Icons.Outlined.HelpOutline)
     object Settings : Screen("settings", "Ajustes", Icons.Filled.Settings)
     object Profile : Screen("profile", "Perfil", Icons.Filled.AccountCircle)
+    object Onboarding : Screen("onboarding/preferences", "Preferencias", Icons.Filled.Home)
     object AnimeDetail : Screen("anime/{animeId}", "Detalle", Icons.Filled.Home) {
         fun createRoute(animeId: Long) = "anime/$animeId"
     }

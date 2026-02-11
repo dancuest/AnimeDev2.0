@@ -29,6 +29,7 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,6 +43,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.animedev20.ui.theme.data.AppContainer
+import com.example.animedev20.ui.theme.data.DefaultAppContainer
 import com.example.animedev20.ui.theme.data.FakeDataSource
 import com.example.animedev20.ui.theme.domain.model.DurationType
 import com.example.animedev20.ui.theme.theme.AnimeDevTheme
@@ -49,7 +52,13 @@ import com.example.animedev20.ui.theme.theme.AnimeDevTheme
 @Composable
 fun OnboardingPreferencesRoute(
     onContinue: () -> Unit,
-    viewModel: OnboardingPreferencesViewModel = viewModel(factory = OnboardingPreferencesViewModel.Factory)
+    appContainer: AppContainer = DefaultAppContainer(),
+    viewModel: OnboardingPreferencesViewModel = viewModel(
+        factory = OnboardingPreferencesViewModel.provideFactory(
+            userRepository = appContainer.userRepository,
+            animeRepository = appContainer.animeRepository
+        )
+    )
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -147,7 +156,7 @@ fun OnboardingPreferencesScreen(
                     }
                     item {
                         Text(
-                            text = "Elige la duración que prefieres",
+                            text = "Elige una o más duraciones",
                             style = MaterialTheme.typography.titleMedium
                         )
                         Spacer(modifier = Modifier.height(8.dp))
@@ -155,7 +164,7 @@ fun OnboardingPreferencesScreen(
                             DurationType.values().forEach { duration ->
                                 DurationPreferenceCard(
                                     durationType = duration,
-                                    selected = state.preferredDuration == duration,
+                                    selected = state.preferredDurations.contains(duration),
                                     onClick = { onDurationSelected(duration) }
                                 )
                             }
@@ -169,7 +178,7 @@ fun OnboardingPreferencesScreen(
                             Button(
                                 onClick = onContinue,
                                 enabled = state.selectedGenres.isNotEmpty() &&
-                                        state.preferredDuration != null &&
+                                        state.preferredDurations.isNotEmpty() &&
                                         !state.isSaving,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
@@ -236,17 +245,23 @@ private fun DurationPreferenceCard(
         colors = CardDefaults.cardColors(containerColor = containerColor),
         border = borderStroke
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = durationLabel(durationType),
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text(
-                text = durationDescription(durationType),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 4.dp)
-            )
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(checked = selected, onCheckedChange = { onClick() })
+            Column(modifier = Modifier.padding(start = 12.dp)) {
+                Text(
+                    text = durationLabel(durationType),
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = durationDescription(durationType),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
         }
     }
 }
@@ -310,7 +325,7 @@ private fun OnboardingPreferencesPreview() {
                 isLoading = false,
                 availableGenres = FakeDataSource.genres,
                 selectedGenres = emptySet(),
-                preferredDuration = null
+                preferredDurations = emptySet()
             ),
             onGenreSelected = {},
             onDurationSelected = {},

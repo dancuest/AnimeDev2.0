@@ -4,36 +4,52 @@ import com.example.animedev20.ui.theme.domain.model.AnimeSection
 import com.example.animedev20.ui.theme.domain.model.HomeContent
 import com.example.animedev20.ui.theme.domain.repository.AnimeRepository
 import com.example.animedev20.ui.theme.domain.repository.UserRepository
-import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.delay
 
 class GetHomeContentUseCase(
     private val animeRepository: AnimeRepository,
     private val userRepository: UserRepository
 ) {
-    suspend operator fun invoke(): Result<HomeContent> = runCatching {
-        supervisorScope {
-            // 1) Primero el hero (una sola llamada)
-            val heroAnime = animeRepository.getHeroRecommendation()
 
-            // 2) Limita la cantidad de géneros para no pegarte un tiro en el pie con Jikan
-            //    Si quieres, sube/baja este número.
-            val preferredGenres = userRepository.getPreferredGenres().take(5)
+    private companion object {
+        private const val THROTTLE_MS = 400L
+    }
 
-            // 3) Carga SECUENCIAL: evita ráfagas => evita rate-limit
-            //    Si una sección falla, NO tumba el Home: la dejamos vacía.
-            val sections = preferredGenres.map { genre ->
-                runCatching {
-                    val animes = animeRepository.getAnimesByGenre(genre.id)
-                    AnimeSection(genre = genre, animes = animes)
-                }.getOrElse {
-                    AnimeSection(genre = genre, animes = emptyList())
-                }
+    suspend operator fun invoke(): Result<HomeContent> = try {
+        // 1) Hero primero (1 request)
+        val heroAnime = animeRepository.getHeroRecommendation()
+
+        // 2) Géneros preferidos (no debería ser red, normalmente es local)
+        val preferredGenres = userRepository.getPreferredGenres()
+
+        // 3) Secciones por género, PERO en serie + throttle
+        val sections = mutableListOf<AnimeSection>()
+
+        if (preferredGenres.isNotEmpty()) delay(THROTTLE_MS)
+
+        for ((index, genre) in preferredGenres.withIndex()) {
+            val animes = try {
+                animeRepository.getAnimesByGenre(genre.id)
+            } catch (_: Exception) {
+                emptyList()
             }
 
+            sections += AnimeSection(
+                genre = genre,
+                animes = animes
+            )
+
+            if (index != preferredGenres.lastIndex) delay(THROTTLE_MS)
+        }
+
+        Result.success(
             HomeContent(
                 heroAnime = heroAnime,
+                preferredGenres = preferredGenres,
                 sections = sections
             )
-        }
+        )
+    } catch (e: Exception) {
+        Result.failure(e)
     }
 }

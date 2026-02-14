@@ -12,4 +12,5 @@ interface UserRepository {
     suspend fun getUserSettings(): UserSettings
     suspend fun updateUserSettings(settings: UserSettings): UserSettings
     suspend fun updateAccountInfo(name: String, email: String, nickname: String): UserProfile
+    suspend fun updatePreferredGenres(genres: List<Genre>): List<Genre>
 }

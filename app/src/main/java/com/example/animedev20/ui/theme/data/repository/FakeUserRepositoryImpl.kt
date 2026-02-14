@@ -37,10 +37,17 @@ object FakeUserRepositoryImpl : UserRepository {
         cachedSettings = settings
         val updatedProfile = profileFlow.value.copy(
             favoriteGenres = settings.preferredGenres,
-            preferredDuration = settings.preferredDuration
+            preferredDurations = settings.preferredDurations
         )
         profileFlow.value = updatedProfile
         return cachedSettings
+    }
+
+    override suspend fun updatePreferredGenres(genres: List<Genre>): List<Genre> {
+        delay(400)
+        cachedSettings = cachedSettings.copy(preferredGenres = genres)
+        profileFlow.value = profileFlow.value.copy(favoriteGenres = genres)
+        return cachedSettings.preferredGenres
     }
 
     override suspend fun updateAccountInfo(

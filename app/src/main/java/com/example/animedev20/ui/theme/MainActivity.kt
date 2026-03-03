@@ -14,6 +14,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.material3.CircularProgressIndicator
@@ -22,9 +23,6 @@ import com.example.animedev20.ui.theme.navigation.AppNavHost
 import com.example.animedev20.ui.theme.navigation.BottomNavigationBar
 import com.example.animedev20.ui.theme.navigation.Screen
 import com.example.animedev20.ui.theme.theme.AnimeDevTheme
-import kotlin.getOrElse
-import kotlin.map
-import kotlin.runCatching
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,7 +39,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
-    val appContainer = remember { DefaultAppContainer() }
+    val context = LocalContext.current.applicationContext
+    val appContainer = remember(context) { DefaultAppContainer(context = context) }
     val startDestination by produceState<String?>(initialValue = null) {
         val destination = runCatching { appContainer.userRepository.getUserSettings() }
             .map { settings ->

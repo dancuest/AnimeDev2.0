@@ -20,7 +20,7 @@ data class Anime(
     val synopsis: String,
     val coverImageUrl: String,
 
-    // Se conserva para compatibilidad con respuestas anteriores del backend.
+
     val mangaPlusUrl: String = "",
 
     val mangaUrl: String? = null,

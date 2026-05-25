@@ -30,11 +30,7 @@ object AnimeApiFactory {
             chain.proceed(authenticatedRequest)
         }
 
-        /**
-         * El detalle del anime puede tardar más porque el backend traduce
-         * la sinopsis antes de responder. Sin estos timeouts, OkHttp puede
-         * cortar la llamada antes de que llegue la respuesta traducida.
-         */
+
         val okHttpClient = OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)

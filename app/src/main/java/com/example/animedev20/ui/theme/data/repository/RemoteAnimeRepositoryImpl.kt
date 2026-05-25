@@ -50,14 +50,6 @@ class RemoteAnimeRepositoryImpl(
     }
 
     override suspend fun getAnimeDetail(animeId: Long): AnimeDetail {
-        /**
-         * Importante:
-         * No hacemos fallback a /anime/{id}.
-         *
-         * /anime/{id} viene crudo desde Jikan y puede traer la sinopsis en inglés.
-         * Si /anime/{id}/detail falla, preferimos mostrar error antes que
-         * contaminar la pantalla de detalle con una sinopsis no traducida.
-         */
         return safeCall(
             call = { animeApi.getDetail(animeId).data },
             errorMessage = "No fue posible cargar el detalle traducido del anime."

@@ -30,8 +30,8 @@ class FakeAnimeRepositoryImpl : AnimeRepository {
         return FakeDataSource.animeCatalog.filter { anime ->
             val normalizedQuery = query.trim().lowercase()
             anime.title.lowercase().contains(normalizedQuery) ||
-                    anime.synopsis.lowercase().contains(normalizedQuery) ||
-                    (anime.originalTitle?.lowercase()?.contains(normalizedQuery) ?: false)
+                anime.synopsis.lowercase().contains(normalizedQuery) ||
+                (anime.originalTitle?.lowercase()?.contains(normalizedQuery) ?: false)
         }
     }
 

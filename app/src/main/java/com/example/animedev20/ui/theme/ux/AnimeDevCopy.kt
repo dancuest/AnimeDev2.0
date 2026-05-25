@@ -1,123 +1,112 @@
 package com.example.animedev20.ui.theme.ux
 
 object AnimeDevCopy {
-    object Success {
-        const val tokenGenerated = "Token generado con éxito. Revisa tu correo."
-        const val passwordReset = "Contraseña restablecida con éxito."
-        const val accountCreated = "Cuenta creada con éxito."
-        object Validation {
-        const val invalidEmail = "El correo electrónico no es válido."
-        const val shortPassword = "La contraseña es demasiado corta."
-        const val required = "Este campo es obligatorio."
-        const val requiredToken = "El token es obligatorio."
-        const val requiredNewPassword = "La nueva contraseña es obligatoria."
-        const val passwordMismatch = "Las contraseñas no coinciden."
+
+    object Actions {
+        const val goBack = "Volver a la pantalla anterior"
+        const val login = "Iniciar sesión"
+        const val register = "Crear cuenta"
+        const val send = "Enviar"
+        const val cancel = "Cancelar"
+        const val continueAction = "Continuar"
+        const val tryAgain = "Volver a intentar"
+        const val goToLogin = "Ir a iniciar sesión"
+        const val goToRegister = "Crear una cuenta"
+        const val saveChanges = "Guardar cambios"
+        const val continueAsGuest = "Explorar como invitado"
     }
-}
-    object Errors {
-        const val generic = "Ha ocurrido un error inesperado."
-        const val authGeneric = "Error de autenticación."
-        const val invalidEmail = "El correo electrónico no es válido."
-        const val shortPassword = "La contraseña es demasiado corta."
-        const val emptyFields = "Por favor, completa todos los campos."
-        const val passwordMismatch = "Las contraseñas no coinciden."
-        const val sessionExpired = "Tu sesión ha expirado."
-        const val server = "Error del servidor."
-        const val network = "Error de red."
-        object Validation {
-        const val invalidEmail = "El correo electrónico no es válido."
-        const val shortPassword = "La contraseña es demasiado corta."
-        const val required = "Este campo es obligatorio."
-        const val requiredToken = "El token es obligatorio."
-        const val requiredNewPassword = "La nueva contraseña es obligatoria."
-        const val passwordMismatch = "Las contraseñas no coinciden."
-    }
-}
+
     object Auth {
-        const val loginTitle = "Iniciar Sesión"
-        const val loginSubtitle = "Introduce tus credenciales"
-        const val registerTitle = "Crear Cuenta"
-        const val registerSubtitle = "Regístrate para continuar"
-        const val forgotPasswordTitle = "Recuperar Contraseña"
-        const val forgotPasswordSubtitle = "Te enviaremos un código"
-        const val welcomeTitle = "Bienvenido"
-        const val welcomeSubtitle = "La mejor app de anime"
-        const val welcomeHelper = "¿Ya tienes cuenta?"
-        const val welcomeBack = "¡Bienvenido de nuevo!"
-        const val joinUs = "Únete a AnimeDev"
-        const val resetPasswordTitle = "Restablecer Contraseña"
-        const val resetPasswordSubtitle = "Elige una nueva contraseña"
+        const val welcomeTitle = "AnimeDev"
+        const val welcomeSubtitle = "Descubre animes, guarda favoritos y pon a prueba tu nivel otaku."
+        const val welcomeHelper =
+            "Crea una cuenta para guardar tu progreso o entra como invitado para explorar primero."
+
+        const val guestHelper =
+            "Como invitado puedes explorar la app. Para guardar favoritos y progreso, crea una cuenta después."
+
+        const val loginTitle = "Bienvenido de nuevo"
+        const val loginSubtitle = "Inicia sesión para continuar tu experiencia anime."
+
+        const val registerTitle = "Crear cuenta"
+        const val registerSubtitle = "Únete a AnimeDev y guarda tus animes, trivias y progreso."
+
+        const val forgotPasswordTitle = "Recuperar contraseña"
+        const val forgotPasswordSubtitle =
+            "Escribe el correo de tu cuenta. Te mostraremos un token temporal para restablecer tu contraseña."
+
+        const val resetPasswordTitle = "Nueva contraseña"
+        const val resetPasswordSubtitle =
+            "Ingresa tu correo, el token de recuperación y una nueva contraseña segura."
+
         const val emailLabel = "Correo electrónico"
-        const val emailPlaceholder = "ejemplo@correo.com"
+        const val emailPlaceholder = "nombre@correo.com"
+
         const val passwordLabel = "Contraseña"
+        const val newPasswordLabel = "Nueva contraseña"
         const val confirmPasswordLabel = "Confirmar contraseña"
-        const val displayNameLabel = "Nombre de usuario"
-        const val displayNamePlaceholder = "Tu nombre"
-        const val tokenLabel = "Token"
-        const val tokenPlaceholder = "Introduce el token"
-        const val guestHelper = "O continúa como invitado"
+
+        const val displayNameLabel = "Nombre"
+        const val displayNamePlaceholder = "Ejemplo: Daniel"
+
+        const val tokenLabel = "Token de recuperación"
+        const val tokenPlaceholder = "Pega aquí el token generado"
+
+        const val forgotPasswordAction = "¿Olvidaste tu contraseña?"
+        const val generateToken = "Generar token"
+        const val goToResetPassword = "Restablecer contraseña"
+        const val backToLogin = "Volver al inicio de sesión"
+
         const val noAccount = "¿No tienes cuenta?"
         const val alreadyHaveAccount = "¿Ya tienes cuenta?"
-        const val demoTokenLabel = "Token de demo"
-        const val demoTokenExpirationLabel = "Expira en"
-        const val passwordUpdatedTitle = "Contraseña actualizada"
-        const val passwordUpdatedMessage = "Ya puedes iniciar sesión con tu nueva contraseña"
-        object Validation {
-        const val invalidEmail = "El correo electrónico no es válido."
-        const val shortPassword = "La contraseña es demasiado corta."
-        const val required = "Este campo es obligatorio."
-        const val requiredToken = "El token es obligatorio."
-        const val requiredNewPassword = "La nueva contraseña es obligatoria."
-        const val passwordMismatch = "Las contraseñas no coinciden."
+
+        const val passwordUpdatedTitle = "¡Contraseña actualizada!"
+        const val passwordUpdatedMessage = "Ya puedes iniciar sesión con tu nueva contraseña."
+
+        const val demoTokenLabel = "Token temporal"
+        const val demoTokenExpirationLabel = "Vence"
     }
-}
-    object Actions {
-        const val login = "Iniciar Sesión"
-        const val register = "Registrarse"
-        const val sendToken = "Enviar Token"
-        const val resetPassword = "Restablecer"
-        const val continueAsGuest = "Continuar como invitado"
-        const val goBack = "Volver"
-        const val generateToken = "Generar Token"
-        const val goToResetPassword = "Ir a restablecer"
-        const val backToLogin = "Volver al login"
-        const val forgotPasswordAction = "¿Olvidaste tu contraseña?"
-        const val goToRegister = "Regístrate aquí"
-        const val goToLogin = "Inicia sesión aquí"
-        object Validation {
-        const val invalidEmail = "El correo electrónico no es válido."
-        const val shortPassword = "La contraseña es demasiado corta."
-        const val required = "Este campo es obligatorio."
-        const val requiredToken = "El token es obligatorio."
-        const val requiredNewPassword = "La nueva contraseña es obligatoria."
-        const val passwordMismatch = "Las contraseñas no coinciden."
+
+    object Validation {
+        const val requiredEmail = "Escribe tu correo electrónico."
+        const val invalidEmail = "El correo debe tener un formato válido, por ejemplo nombre@correo.com."
+
+        const val requiredPassword = "Escribe tu contraseña."
+        const val shortPassword = "La contraseña debe tener al menos 6 caracteres."
+
+        const val requiredDisplayName = "Escribe el nombre que quieres mostrar en tu perfil."
+        const val shortDisplayName = "El nombre debe tener al menos 2 caracteres."
+
+        const val requiredToken = "Ingresa el token de recuperación."
+        const val shortToken = "El token parece incompleto. Revisa que lo hayas copiado completo."
+
+        const val requiredNewPassword = "Escribe una nueva contraseña."
+        const val passwordsDoNotMatch = "Las contraseñas no coinciden."
     }
-}
+
+    object Errors {
+        const val generic = "Algo salió mal. Inténtalo de nuevo."
+        const val authGeneric = "No pudimos completar la autenticación. Revisa tus datos e inténtalo de nuevo."
+        const val network = "No pudimos conectar con AnimeDev. Revisa tu conexión a internet."
+        const val server = "AnimeDev está tardando más de lo normal. Inténtalo de nuevo en unos minutos."
+    }
+
+    object Success {
+        const val tokenGenerated =
+            "Token generado correctamente. Úsalo para crear una nueva contraseña."
+        const val accountCreated =
+            "Cuenta creada correctamente. Ahora personaliza tu experiencia."
+        const val loginCompleted =
+            "Sesión iniciada correctamente."
+    }
+
     object Accessibility {
-        const val back = "Volver"
+        const val appLogo = "Logo de AnimeDev"
         const val showPassword = "Mostrar contraseña"
         const val hidePassword = "Ocultar contraseña"
-        const val logo = "Logo de AnimeDev"
-        const val appLogo = "Logo de la aplicación"
-        const val emailIcon = "Icono de email"
-        const val passwordIcon = "Icono de contraseña"
-        const val userIcon = "Icono de usuario"
-        const val tokenIcon = "Icono de token"
-        object Validation {
-        const val invalidEmail = "El correo electrónico no es válido."
-        const val shortPassword = "La contraseña es demasiado corta."
-        const val required = "Este campo es obligatorio."
-        const val requiredToken = "El token es obligatorio."
-        const val requiredNewPassword = "La nueva contraseña es obligatoria."
-        const val passwordMismatch = "Las contraseñas no coinciden."
-    }
-}
-    object Validation {
-        const val invalidEmail = "El correo electrónico no es válido."
-        const val shortPassword = "La contraseña es demasiado corta."
-        const val required = "Este campo es obligatorio."
-        const val requiredToken = "El token es obligatorio."
-        const val requiredNewPassword = "La nueva contraseña es obligatoria."
-        const val passwordMismatch = "Las contraseñas no coinciden."
+        const val emailIcon = "Campo de correo electrónico"
+        const val passwordIcon = "Campo de contraseña"
+        const val userIcon = "Campo de nombre de usuario"
+        const val tokenIcon = "Campo de token de recuperación"
     }
 }

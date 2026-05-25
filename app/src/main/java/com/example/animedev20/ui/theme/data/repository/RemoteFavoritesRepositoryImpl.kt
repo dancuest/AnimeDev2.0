@@ -47,13 +47,7 @@ class RemoteFavoritesRepositoryImpl(
                     favoriteIds.map { animeId ->
                         async {
                             runCatching {
-                                /**
-                                 * Se usa /anime/{id}/detail porque ese endpoint entrega
-                                 * la sinopsis ya traducida al español desde backend.
-                                 *
-                                 * Esto corrige favoritos y también la sección de trivias,
-                                 * porque las trivias se alimentan desde favoritesRepository.favorites.
-                                 */
+
                                 animeApi.getDetail(animeId).data.anime
                             }.onFailure { error ->
                                 Log.w(

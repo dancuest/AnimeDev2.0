@@ -42,15 +42,6 @@ class GetHomeContentUseCase(
                 Exception("No se pudo cargar el contenido principal. Verifica tu conexión.")
             )
 
-        /**
-         * Regla de negocio:
-         * El hero principal del Home nunca debe mostrar una sinopsis en inglés.
-         *
-         * Las recomendaciones adaptativas y los listados por género pueden venir como
-         * Anime resumido. Por eso aquí se fuerza hidratación usando /anime/{id}/detail.
-         * Si esa hidratación falla, se intenta usar el hero general del backend.
-         * Si todo falla, se conserva el anime candidato pero con copy seguro en español.
-         */
         val heroAnime = resolveSpanishHeroAnime(heroCandidate)
 
         val recommendationList = resolveRecommendationList(

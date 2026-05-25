@@ -17,10 +17,9 @@ data class UserProfile(
     val favoriteGenres: List<Genre>,
     val badges: List<String>,
     val favoriteQuote: String? = null,
-    val coverImageUrl: String = ""
+    val coverImageUrl: String = "",
+    val role: String = USER_ROLE
 )
-
-fun UserProfile.canModerateTrivia(): Boolean = email.endsWith("@animedev.io") || nickname == "Admin"
 
 data class UserSettings(
     val ageRange: Int = 0,
@@ -40,3 +39,11 @@ data class TriviaProfileStats(
     val masteryLevel: String,
     val scoresByDifficulty: Map<TriviaDifficulty, Int>
 )
+
+const val USER_ROLE = "USER"
+const val MODERATOR_ROLE = "MODERATOR"
+const val ADMIN_ROLE = "ADMIN"
+
+fun UserProfile.canModerateTrivia(): Boolean {
+    return role.equals("ADMIN", ignoreCase = true)
+}

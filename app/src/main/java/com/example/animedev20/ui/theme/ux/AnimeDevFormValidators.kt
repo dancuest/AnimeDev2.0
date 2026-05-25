@@ -1,78 +1,222 @@
 package com.example.animedev20.ui.theme.ux
 
-object AnimeDevFormValidators {
-    data class ValidationResult(val isValid: Boolean, val message: String? = null)
+data class FieldValidation(
+    val isValid: Boolean,
+    val message: String? = null
+)
 
-    fun loginError(email: String, password: String): String? {
-        if (email.isBlank() || password.isBlank()) return AnimeDevCopy.Errors.emptyFields
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) return AnimeDevCopy.Errors.invalidEmail
+object AnimeDevFormValidators {
+
+    private val emailRegex = Regex(
+        pattern = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
+    )
+
+    fun validateEmail(email: String): FieldValidation {
+        val cleanEmail = email.trim()
+
+        return when {
+            cleanEmail.isBlank() -> FieldValidation(
+                isValid = false,
+                message = AnimeDevCopy.Validation.requiredEmail
+            )
+
+            !emailRegex.matches(cleanEmail) -> FieldValidation(
+                isValid = false,
+                message = AnimeDevCopy.Validation.invalidEmail
+            )
+
+            else -> FieldValidation(isValid = true)
+        }
+    }
+
+    fun validatePassword(password: String): FieldValidation {
+        return when {
+            password.isBlank() -> FieldValidation(
+                isValid = false,
+                message = AnimeDevCopy.Validation.requiredPassword
+            )
+
+            password.length < 6 -> FieldValidation(
+                isValid = false,
+                message = AnimeDevCopy.Validation.shortPassword
+            )
+
+            else -> FieldValidation(isValid = true)
+        }
+    }
+
+    fun validateNewPassword(password: String): FieldValidation {
+        return when {
+            password.isBlank() -> FieldValidation(
+                isValid = false,
+                message = AnimeDevCopy.Validation.requiredNewPassword
+            )
+
+            password.length < 6 -> FieldValidation(
+                isValid = false,
+                message = AnimeDevCopy.Validation.shortPassword
+            )
+
+            else -> FieldValidation(isValid = true)
+        }
+    }
+
+    fun validateConfirmPassword(
+        password: String,
+        confirmPassword: String
+    ): FieldValidation {
+        return when {
+            confirmPassword.isBlank() -> FieldValidation(
+                isValid = false,
+                message = AnimeDevCopy.Validation.passwordsDoNotMatch
+            )
+
+            password != confirmPassword -> FieldValidation(
+                isValid = false,
+                message = AnimeDevCopy.Validation.passwordsDoNotMatch
+            )
+
+            else -> FieldValidation(isValid = true)
+        }
+    }
+
+    fun validateDisplayName(displayName: String): FieldValidation {
+        val cleanName = displayName.trim()
+
+        return when {
+            cleanName.isBlank() -> FieldValidation(
+                isValid = false,
+                message = AnimeDevCopy.Validation.requiredDisplayName
+            )
+
+            cleanName.length < 2 -> FieldValidation(
+                isValid = false,
+                message = AnimeDevCopy.Validation.shortDisplayName
+            )
+
+            else -> FieldValidation(isValid = true)
+        }
+    }
+
+    fun validateResetToken(token: String): FieldValidation {
+        val cleanToken = token.trim()
+
+        return when {
+            cleanToken.isBlank() -> FieldValidation(
+                isValid = false,
+                message = AnimeDevCopy.Validation.requiredToken
+            )
+
+            cleanToken.length < 4 -> FieldValidation(
+                isValid = false,
+                message = AnimeDevCopy.Validation.shortToken
+            )
+
+            else -> FieldValidation(isValid = true)
+        }
+    }
+
+    fun loginError(
+        email: String,
+        password: String
+    ): String? {
+        val emailValidation = validateEmail(email)
+        if (!emailValidation.isValid) return emailValidation.message
+
+        val passwordValidation = validatePassword(password)
+        if (!passwordValidation.isValid) return passwordValidation.message
+
         return null
     }
 
-    fun registerError(displayName: String, email: String, password: String): String? {
-        if (displayName.isBlank() || email.isBlank() || password.isBlank()) return AnimeDevCopy.Errors.emptyFields
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) return AnimeDevCopy.Errors.invalidEmail
-        if (password.length < 6) return AnimeDevCopy.Errors.shortPassword
+    fun registerError(
+        displayName: String,
+        email: String,
+        password: String
+    ): String? {
+        val nameValidation = validateDisplayName(displayName)
+        if (!nameValidation.isValid) return nameValidation.message
+
+        val emailValidation = validateEmail(email)
+        if (!emailValidation.isValid) return emailValidation.message
+
+        val passwordValidation = validatePassword(password)
+        if (!passwordValidation.isValid) return passwordValidation.message
+
         return null
     }
 
     fun forgotPasswordError(email: String): String? {
-        if (email.isBlank()) return AnimeDevCopy.Errors.emptyFields
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) return AnimeDevCopy.Errors.invalidEmail
+        val emailValidation = validateEmail(email)
+        return if (emailValidation.isValid) null else emailValidation.message
+    }
+
+    fun resetPasswordError(
+        email: String,
+        token: String,
+        newPassword: String,
+        confirmPassword: String
+    ): String? {
+        val emailValidation = validateEmail(email)
+        if (!emailValidation.isValid) return emailValidation.message
+
+        val tokenValidation = validateResetToken(token)
+        if (!tokenValidation.isValid) return tokenValidation.message
+
+        val passwordValidation = validateNewPassword(newPassword)
+        if (!passwordValidation.isValid) return passwordValidation.message
+
+        val confirmValidation = validateConfirmPassword(
+            password = newPassword,
+            confirmPassword = confirmPassword
+        )
+        if (!confirmValidation.isValid) return confirmValidation.message
+
         return null
     }
 
-    fun resetPasswordError(password: String, confirm: String, token: String): String? {
-        if (password.isBlank() || confirm.isBlank() || token.isBlank()) return AnimeDevCopy.Errors.emptyFields
-        if (password != confirm) return AnimeDevCopy.Errors.passwordMismatch
-        if (password.length < 6) return AnimeDevCopy.Errors.shortPassword
-        return null
+    fun canSubmitLogin(
+        email: String,
+        password: String,
+        isLoading: Boolean
+    ): Boolean {
+        return !isLoading &&
+                validateEmail(email).isValid &&
+                validatePassword(password).isValid
     }
 
-    fun validateEmail(email: String): ValidationResult {
-        return if (android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) ValidationResult(true)
-        else ValidationResult(false, AnimeDevCopy.Validation.invalidEmail)
+    fun canSubmitRegister(
+        displayName: String,
+        email: String,
+        password: String,
+        isLoading: Boolean
+    ): Boolean {
+        return !isLoading &&
+                validateDisplayName(displayName).isValid &&
+                validateEmail(email).isValid &&
+                validatePassword(password).isValid
     }
 
-    fun validatePassword(password: String): ValidationResult {
-        return if (password.length >= 6) ValidationResult(true)
-        else ValidationResult(false, AnimeDevCopy.Validation.shortPassword)
+    fun canSubmitForgotPassword(
+        email: String,
+        isLoading: Boolean
+    ): Boolean {
+        return !isLoading && validateEmail(email).isValid
     }
 
-    fun validateDisplayName(name: String): ValidationResult {
-        return if (name.isNotBlank()) ValidationResult(true)
-        else ValidationResult(false, AnimeDevCopy.Validation.required)
-    }
-
-    fun validateConfirmPassword(password: String, confirmPassword: String): ValidationResult {
-        return if (password == confirmPassword && password.isNotBlank()) ValidationResult(true)
-        else ValidationResult(false, AnimeDevCopy.Validation.passwordMismatch)
-    }
-
-    fun validateResetToken(token: String): ValidationResult {
-        return if (token.isNotBlank()) ValidationResult(true)
-        else ValidationResult(false, AnimeDevCopy.Validation.requiredToken)
-    }
-
-    fun validateNewPassword(password: String): ValidationResult {
-        return if (password.length >= 6) ValidationResult(true)
-        else ValidationResult(false, AnimeDevCopy.Validation.shortPassword)
-    }
-
-    fun canSubmitLogin(email: String, password: String, isLoading: Boolean): Boolean = 
-        !isLoading && validateEmail(email).isValid && validatePassword(password).isValid
-    
-    fun canSubmitForgotPassword(email: String, isLoading: Boolean): Boolean = 
-        !isLoading && validateEmail(email).isValid
-    
-    fun canSubmitResetPassword(email: String, token: String, newPassword: String, confirmPassword: String, isLoading: Boolean): Boolean = 
-        !isLoading && 
-        validateEmail(email).isValid && 
-        validateResetToken(token).isValid && 
-        validateNewPassword(newPassword).isValid && 
-        validateConfirmPassword(newPassword, confirmPassword).isValid
-
-    object Validation {
-        // Obsolete, use AnimeDevCopy.Validation
+    fun canSubmitResetPassword(
+        email: String,
+        token: String,
+        newPassword: String,
+        confirmPassword: String,
+        isLoading: Boolean
+    ): Boolean {
+        return !isLoading &&
+                resetPasswordError(
+                    email = email,
+                    token = token,
+                    newPassword = newPassword,
+                    confirmPassword = confirmPassword
+                ) == null
     }
 }

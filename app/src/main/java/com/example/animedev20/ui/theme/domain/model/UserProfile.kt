@@ -20,6 +20,8 @@ data class UserProfile(
     val coverImageUrl: String = ""
 )
 
+fun UserProfile.canModerateTrivia(): Boolean = email.endsWith("@animedev.io") || nickname == "Admin"
+
 data class UserSettings(
     val ageRange: Int = 0,
     val genderCode: Int = 0,

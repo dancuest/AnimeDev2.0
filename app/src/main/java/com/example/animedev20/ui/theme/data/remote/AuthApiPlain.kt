@@ -2,9 +2,12 @@ package com.example.animedev20.ui.theme.data.remote
 
 import com.google.gson.annotations.SerializedName
 import retrofit2.http.Body
+import retrofit2.http.Header
 import retrofit2.http.POST
 
-data class DeviceLoginRequest(val deviceId: String)
+data class DeviceLoginRequest(
+    val deviceId: String
+)
 
 data class RegisterRequest(
     val email: String,
@@ -58,18 +61,30 @@ data class BasicMessageResponse(
 )
 
 interface AuthApiPlain {
+
     @POST("auth/device")
-    suspend fun loginDevice(@Body req: DeviceLoginRequest): AuthSessionResponse
+    suspend fun loginDevice(
+        @Body req: DeviceLoginRequest
+    ): AuthSessionResponse
 
     @POST("auth/login")
-    suspend fun login(@Body req: LoginRequest): AuthSessionResponse
+    suspend fun login(
+        @Body req: LoginRequest
+    ): AuthSessionResponse
 
     @POST("auth/register")
-    suspend fun register(@Body req: RegisterRequest): AuthSessionResponse
+    suspend fun register(
+        @Header("Authorization") authorization: String,
+        @Body req: RegisterRequest
+    ): AuthSessionResponse
 
     @POST("auth/forgot-password")
-    suspend fun forgotPassword(@Body req: ForgotPasswordRequest): ForgotPasswordResponse
+    suspend fun forgotPassword(
+        @Body req: ForgotPasswordRequest
+    ): ForgotPasswordResponse
 
     @POST("auth/reset-password")
-    suspend fun resetPassword(@Body req: ResetPasswordRequest): BasicMessageResponse
+    suspend fun resetPassword(
+        @Body req: ResetPasswordRequest
+    ): BasicMessageResponse
 }

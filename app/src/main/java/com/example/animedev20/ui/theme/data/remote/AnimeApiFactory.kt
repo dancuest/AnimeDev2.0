@@ -1,14 +1,17 @@
 package com.example.animedev20.ui.theme.data.remote
 
+import java.util.concurrent.TimeUnit
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.util.concurrent.TimeUnit
 
 object AnimeApiFactory {
 
-    fun createRetrofit(baseUrl: String, tokenStore: AuthTokenStore): Retrofit {
+    fun createRetrofit(
+        baseUrl: String,
+        tokenStore: AuthTokenStore
+    ): Retrofit {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
@@ -17,19 +20,24 @@ object AnimeApiFactory {
             val request = chain.request()
             val path = request.url.encodedPath
             val shouldSkipAuth = path.contains("/auth/device")
+            val alreadyHasAuthorizationHeader = request.header("Authorization") != null
             val token = tokenStore.getToken()
 
-            val authenticatedRequest = if (!shouldSkipAuth && !token.isNullOrBlank()) {
-                request.newBuilder()
-                    .header("Authorization", "Bearer $token")
-                    .build()
-            } else {
-                request
-            }
+            val authenticatedRequest =
+                if (
+                    !shouldSkipAuth &&
+                    !alreadyHasAuthorizationHeader &&
+                    !token.isNullOrBlank()
+                ) {
+                    request.newBuilder()
+                        .header("Authorization", "Bearer $token")
+                        .build()
+                } else {
+                    request
+                }
 
             chain.proceed(authenticatedRequest)
         }
-
 
         val okHttpClient = OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
@@ -39,7 +47,11 @@ object AnimeApiFactory {
             .addInterceptor(loggingInterceptor)
             .build()
 
-        val normalizedBaseUrl = if (baseUrl.endsWith("/")) baseUrl else "$baseUrl/"
+        val normalizedBaseUrl = if (baseUrl.endsWith("/")) {
+            baseUrl
+        } else {
+            "$baseUrl/"
+        }
 
         return Retrofit.Builder()
             .baseUrl(normalizedBaseUrl)
@@ -48,7 +60,10 @@ object AnimeApiFactory {
             .build()
     }
 
-    fun create(baseUrl: String, tokenStore: AuthTokenStore): AnimeApi {
+    fun create(
+        baseUrl: String,
+        tokenStore: AuthTokenStore
+    ): AnimeApi {
         return createRetrofit(baseUrl, tokenStore).create(AnimeApi::class.java)
     }
 }

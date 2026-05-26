@@ -18,6 +18,7 @@ import com.example.animedev20.ui.theme.domain.repository.UserRepository
 import com.example.animedev20.ui.theme.navigation.Screen
 import com.example.animedev20.ui.theme.ux.AnimeDevCopy
 import com.example.animedev20.ui.theme.ux.AnimeDevFormValidators
+import java.util.UUID
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -44,6 +45,7 @@ class AuthViewModel(
         runAuthAction {
             val deviceId = tokenStore.createFreshGuestDeviceId()
             val response = authApi.loginDevice(DeviceLoginRequest(deviceId))
+
             persistSession(response)
             navigateToRoute(Screen.Onboarding.route)
         }
@@ -89,19 +91,43 @@ class AuthViewModel(
             return
         }
 
-        runAuthAction {
-            startFreshGuestSessionForRegistration()
-
-            val response = authApi.register(
-                RegisterRequest(
-                    email = email.trim(),
-                    password = password,
-                    displayName = displayName.trim().ifBlank { null }
-                )
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isLoading = true,
+                message = null,
+                nextRoute = null
             )
 
-            persistSession(response)
-            navigateToRoute(resolveRouteAfterRegistration())
+            runCatching {
+                val temporaryGuestDeviceId = "guest-${UUID.randomUUID()}"
+
+                val guestResponse = authApi.loginDevice(
+                    DeviceLoginRequest(temporaryGuestDeviceId)
+                )
+
+                val response = authApi.register(
+                    authorization = "Bearer ${guestResponse.accessToken}",
+                    req = RegisterRequest(
+                        email = email.trim(),
+                        password = password,
+                        displayName = displayName.trim().ifBlank { null }
+                    )
+                )
+
+                persistSession(response)
+                navigateToRoute(resolveRouteAfterRegistration())
+            }.onFailure { error ->
+                tokenStore.clearSession()
+
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    nextRoute = null,
+                    message = friendlyAuthError(
+                        error = error,
+                        fallback = AnimeDevCopy.Errors.authGeneric
+                    )
+                )
+            }
         }
     }
 
@@ -144,7 +170,7 @@ class AuthViewModel(
                     isLoading = false,
                     message = friendlyAuthError(
                         error = error,
-                        fallback = "No pudimos generar el token. Revisa el correo e inténtalo de nuevo."
+                        fallback = "No pudimos generar el token.\nRevisa el correo e inténtalo de nuevo."
                     )
                 )
             }
@@ -157,18 +183,21 @@ class AuthViewModel(
         newPassword: String
     ) {
         val emailValidation = AnimeDevFormValidators.validateEmail(email)
+
         if (!emailValidation.isValid) {
             showMessage(emailValidation.message ?: AnimeDevCopy.Validation.invalidEmail)
             return
         }
 
         val tokenValidation = AnimeDevFormValidators.validateResetToken(token)
+
         if (!tokenValidation.isValid) {
             showMessage(tokenValidation.message ?: AnimeDevCopy.Validation.requiredToken)
             return
         }
 
         val passwordValidation = AnimeDevFormValidators.validateNewPassword(newPassword)
+
         if (!passwordValidation.isValid) {
             showMessage(passwordValidation.message ?: AnimeDevCopy.Validation.requiredNewPassword)
             return
@@ -198,7 +227,7 @@ class AuthViewModel(
                     isLoading = false,
                     message = friendlyAuthError(
                         error = error,
-                        fallback = "No pudimos restablecer la contraseña. Revisa el token e inténtalo de nuevo."
+                        fallback = "No pudimos restablecer la contraseña.\nRevisa el token e inténtalo de nuevo."
                     )
                 )
             }
@@ -232,12 +261,6 @@ class AuthViewModel(
                 )
             }
         }
-    }
-
-    private suspend fun startFreshGuestSessionForRegistration() {
-        val deviceId = tokenStore.createFreshGuestDeviceId()
-        val guestResponse = authApi.loginDevice(DeviceLoginRequest(deviceId))
-        persistSession(guestResponse)
     }
 
     private suspend fun persistSession(response: AuthSessionResponse) {
@@ -311,16 +334,13 @@ class AuthViewModel(
         )
     }
 
-    private fun friendlyAuthError(
-        error: Throwable,
-        fallback: String
-    ): String {
+    private fun friendlyAuthError(error: Throwable, fallback: String): String {
         val rawMessage = error.message.orEmpty()
 
         return when {
             rawMessage.contains("401", ignoreCase = true) ||
                     rawMessage.contains("Unauthorized", ignoreCase = true) -> {
-                "Correo o contraseña incorrectos. Revisa tus datos e inténtalo de nuevo."
+                "Correo o contraseña incorrectos.\nRevisa tus datos e inténtalo de nuevo."
             }
 
             rawMessage.contains("404", ignoreCase = true) ||
@@ -335,7 +355,7 @@ class AuthViewModel(
 
             rawMessage.contains("422", ignoreCase = true) ||
                     rawMessage.contains("400", ignoreCase = true) -> {
-                "Hay un dato que no cumple el formato esperado. Revisa el formulario."
+                "Hay un dato que no cumple el formato esperado.\nRevisa el formulario."
             }
 
             rawMessage.contains("500", ignoreCase = true) ||

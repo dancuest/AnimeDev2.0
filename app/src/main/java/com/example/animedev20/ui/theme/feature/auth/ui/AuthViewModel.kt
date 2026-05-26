@@ -124,12 +124,21 @@ class AuthViewModel(
             runCatching {
                 authApi.forgotPassword(ForgotPasswordRequest(email.trim()))
             }.onSuccess { response ->
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    message = AnimeDevCopy.Success.tokenGenerated,
-                    demoResetToken = response.resetToken,
-                    demoResetExpiresAt = response.expiresAt
-                )
+                if (response.resetToken != null) {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        message = AnimeDevCopy.Success.tokenGenerated,
+                        demoResetToken = response.resetToken,
+                        demoResetExpiresAt = response.expiresAt
+                    )
+                } else {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        message = AnimeDevCopy.Success.tokenNoGenerated,
+                        demoResetToken = null,
+                        demoResetExpiresAt = null
+                    )
+                }
             }.onFailure { error ->
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
@@ -316,7 +325,7 @@ class AuthViewModel(
 
             rawMessage.contains("404", ignoreCase = true) ||
                     rawMessage.contains("not found", ignoreCase = true) -> {
-                "No encontramos una cuenta con esos datos."
+                AnimeDevCopy.Success.tokenNoGenerated
             }
 
             rawMessage.contains("409", ignoreCase = true) ||

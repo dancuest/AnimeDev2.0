@@ -94,6 +94,8 @@ object AnimeDevCopy {
     object Success {
         const val tokenGenerated =
             "Token generado correctamente. Úsalo para crear una nueva contraseña."
+        const val tokenNoGenerated =
+            "No se encontro la cuenta con ese correo electrónico."
         const val accountCreated =
             "Cuenta creada correctamente. Ahora personaliza tu experiencia."
         const val loginCompleted =

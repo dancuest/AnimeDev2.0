@@ -259,6 +259,11 @@ fun AppNavHost(
                 },
                 onTriviaRequested = { targetAnimeId ->
                     navController.navigate(Screen.TriviaPlay.createRoute(targetAnimeId))
+                },
+                onAnimeSelected = { targetAnimeId ->
+                    if (targetAnimeId != animeId) {
+                        navController.navigate(Screen.AnimeDetail.createRoute(targetAnimeId))
+                    }
                 }
             )
         }

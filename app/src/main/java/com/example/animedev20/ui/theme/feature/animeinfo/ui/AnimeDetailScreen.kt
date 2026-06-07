@@ -83,7 +83,8 @@ fun AnimeDetailScreen(
     animeId: Long,
     appContainer: AppContainer = DefaultAppContainer(),
     onBack: () -> Unit,
-    onTriviaRequested: (Long) -> Unit = {}
+    onTriviaRequested: (Long) -> Unit = {},
+    onAnimeSelected: (Long) -> Unit = {}
 ) {
     val viewModel: AnimeDetailViewModel = viewModel(
         factory = AnimeDetailViewModel.provideFactory(
@@ -122,7 +123,8 @@ fun AnimeDetailScreen(
             isGuest = isGuest,
             onBack = onBack,
             onTrivia = { onTriviaRequested(state.detail.anime.id) },
-            onFavoriteToggle = viewModel::toggleFavorite
+            onFavoriteToggle = viewModel::toggleFavorite,
+            onAnimeSelected = onAnimeSelected
         )
     }
 }
@@ -135,7 +137,8 @@ private fun AnimeDetailContent(
     isGuest: Boolean,
     onBack: () -> Unit,
     onTrivia: () -> Unit,
-    onFavoriteToggle: () -> Unit
+    onFavoriteToggle: () -> Unit,
+    onAnimeSelected: (Long) -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
         rememberTopAppBarState()
@@ -248,7 +251,8 @@ private fun AnimeDetailContent(
             item {
                 AnimeStatsSection(
                     anime = detail.anime,
-                    relatedAnime = detail.relatedAnime
+                    relatedAnime = detail.relatedAnime,
+                    onRelatedAnimeSelected = onAnimeSelected
                 )
             }
         }
@@ -695,6 +699,7 @@ private fun CulturalNoteCard(
 private fun AnimeStatsSection(
     anime: Anime,
     relatedAnime: List<RelatedAnime>,
+    onRelatedAnimeSelected: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -768,12 +773,47 @@ private fun AnimeStatsSection(
                 )
 
                 relatedAnime.forEach { relation ->
-                    AnimeStatRow(
-                        label = relation.relationLabel,
-                        value = relation.title
+                    RelatedAnimeActionRow(
+                        relation = relation,
+                        onClick = { onRelatedAnimeSelected(relation.id) }
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun RelatedAnimeActionRow(
+    relation: RelatedAnime,
+    onClick: () -> Unit
+) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            Text(
+                text = relation.relationLabel,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            Text(
+                text = relation.title,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Medium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
@@ -1317,7 +1357,8 @@ private fun AnimeDetailPreview() {
                 isGuest = false,
                 onBack = {},
                 onTrivia = {},
-                onFavoriteToggle = {}
+                onFavoriteToggle = {},
+                onAnimeSelected = {}
             )
         }
     }

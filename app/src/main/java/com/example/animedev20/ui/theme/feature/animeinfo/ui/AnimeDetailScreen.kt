@@ -238,7 +238,10 @@ private fun AnimeDetailContent(
             }
 
             item {
-                CulturalLearningSection(culturalNotes = detail.culturalNotes)
+                CulturalLearningSection(
+                    culturalNotes = detail.culturalNotes,
+                    genres = detail.anime.genres
+                )
             }
 
             item {
@@ -551,9 +554,27 @@ private fun AnimeSynopsisSection(
 @Composable
 private fun CulturalLearningSection(
     culturalNotes: List<String>,
+    genres: List<Genre>,
     modifier: Modifier = Modifier
 ) {
-    if (culturalNotes.isEmpty()) {
+    val backendCards = culturalNotes
+        .filter { it.isNotBlank() }
+        .filterNot { it.isLowValueCulturalNote() }
+        .map { it.toCulturalNoteUi() }
+
+    val backendTerms = backendCards
+        .map { it.title.normalizeCulturalKey() }
+        .toSet()
+
+    val genreGlossaryCards = genres.toGenreGlossaryCards(
+        excludedTerms = backendTerms
+    )
+
+    val cards = (genreGlossaryCards + backendCards)
+        .distinctBy { "${it.category.normalizeCulturalKey()}-${it.title.normalizeCulturalKey()}" }
+        .take(10)
+
+    if (cards.isEmpty()) {
         AnimeDevInfoCard(
             title = "Fichas culturales en construcción",
             message = "Todavía no hay suficiente información cultural disponible para este anime.",
@@ -561,10 +582,6 @@ private fun CulturalLearningSection(
         )
         return
     }
-
-    val cards = culturalNotes
-        .filter { it.isNotBlank() }
-        .map { it.toCulturalNoteUi() }
 
     Column(
         modifier = modifier.padding(horizontal = 16.dp),
@@ -580,7 +597,7 @@ private fun CulturalLearningSection(
             )
 
             Text(
-                text = "Aprende el contexto cultural, histórico y narrativo detrás de esta obra.",
+                text = "Aprende términos, géneros y contextos culturales presentes en esta obra.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -789,6 +806,292 @@ private data class CulturalNoteUi(
     val badge: String? = null,
     val icon: ImageVector
 )
+
+private fun List<Genre>.toGenreGlossaryCards(
+    excludedTerms: Set<String>
+): List<CulturalNoteUi> {
+    return this
+        .mapNotNull { genre ->
+            val key = genre.name.normalizeCulturalKey()
+            val glossary = genreGlossaryDictionary()[key] ?: return@mapNotNull null
+
+            if (glossary.title.normalizeCulturalKey() in excludedTerms) {
+                return@mapNotNull null
+            }
+
+            glossary
+        }
+        .distinctBy { it.title.normalizeCulturalKey() }
+        .take(6)
+}
+
+private fun genreGlossaryDictionary(): Map<String, CulturalNoteUi> {
+    val shonen = CulturalNoteUi(
+        category = "Glosario cultural",
+        title = "Shōnen",
+        body = "Categoría editorial asociada tradicionalmente a público juvenil masculino. En el anime suele relacionarse con aventura, amistad, entrenamiento, rivalidades, superación personal y protagonistas que crecen enfrentando desafíos.",
+        badge = "Género japonés",
+        icon = Icons.Filled.MenuBook
+    )
+
+    val shojo = CulturalNoteUi(
+        category = "Glosario cultural",
+        title = "Shōjo",
+        body = "Categoría editorial asociada tradicionalmente a público juvenil femenino. Suele enfocarse en emociones, vínculos personales, romance, identidad, madurez y conflictos afectivos o sociales.",
+        badge = "Género japonés",
+        icon = Icons.Filled.MenuBook
+    )
+
+    val seinen = CulturalNoteUi(
+        category = "Glosario cultural",
+        title = "Seinen",
+        body = "Categoría editorial orientada generalmente a jóvenes adultos o público adulto. Suele trabajar conflictos psicológicos, políticos, sociales o moralmente complejos, con un tono más maduro.",
+        badge = "Género japonés",
+        icon = Icons.Filled.MenuBook
+    )
+
+    val josei = CulturalNoteUi(
+        category = "Glosario cultural",
+        title = "Josei",
+        body = "Categoría editorial dirigida principalmente a mujeres adultas. Suele abordar relaciones, vida laboral, independencia, madurez emocional y conflictos cotidianos desde una mirada adulta.",
+        badge = "Género japonés",
+        icon = Icons.Filled.MenuBook
+    )
+
+    val isekai = CulturalNoteUi(
+        category = "Glosario cultural",
+        title = "Isekai",
+        body = "Subgénero donde el protagonista es transportado, invocado o reencarna en otro mundo. Culturalmente se relaciona con fantasías de escape, segundas oportunidades, reinicio de vida y adaptación a sociedades con reglas distintas.",
+        badge = "Subgénero",
+        icon = Icons.Filled.MenuBook
+    )
+
+    val yuri = CulturalNoteUi(
+        category = "Glosario cultural",
+        title = "Yuri / Girls Love",
+        body = "Género o etiqueta narrativa centrada en vínculos afectivos o románticos entre personajes femeninos. Puede ir desde relaciones sutiles y emocionales hasta historias románticas explícitas, dependiendo del tono de la obra.",
+        badge = "Relaciones",
+        icon = Icons.Filled.MenuBook
+    )
+
+    val yaoi = CulturalNoteUi(
+        category = "Glosario cultural",
+        title = "Yaoi / Boys Love",
+        body = "Género o etiqueta narrativa centrada en vínculos afectivos o románticos entre personajes masculinos. En la cultura del manga y anime suele asociarse al mercado Boys Love, con historias románticas, dramáticas o emocionales.",
+        badge = "Relaciones",
+        icon = Icons.Filled.MenuBook
+    )
+
+    val mecha = CulturalNoteUi(
+        category = "Glosario cultural",
+        title = "Mecha",
+        body = "Subgénero centrado en robots gigantes, tecnología militar o máquinas pilotadas. Puede representar tensiones entre humanidad, guerra, tecnología, poder político e identidad personal.",
+        badge = "Ciencia ficción",
+        icon = Icons.Filled.MenuBook
+    )
+
+    val mahoShojo = CulturalNoteUi(
+        category = "Glosario cultural",
+        title = "Mahō shōjo",
+        body = "Subgénero de chicas mágicas donde personajes jóvenes adquieren poderes especiales. Suele combinar transformación, amistad, responsabilidad, identidad, fantasía y crecimiento personal.",
+        badge = "Fantasía",
+        icon = Icons.Filled.MenuBook
+    )
+
+    val sliceOfLife = CulturalNoteUi(
+        category = "Glosario cultural",
+        title = "Slice of Life",
+        body = "Género centrado en experiencias cotidianas, relaciones simples y momentos de la vida diaria. Permite observar costumbres escolares, familiares, laborales o comunitarias desde una mirada tranquila y cercana.",
+        badge = "Vida cotidiana",
+        icon = Icons.Filled.MenuBook
+    )
+
+    val iyashikei = CulturalNoteUi(
+        category = "Glosario cultural",
+        title = "Iyashikei",
+        body = "Subgénero asociado a historias calmadas, contemplativas o reconfortantes. Busca generar una sensación de tranquilidad o sanación emocional mediante ambientes cotidianos, naturaleza o vínculos amables.",
+        badge = "Contemplativo",
+        icon = Icons.Filled.MenuBook
+    )
+
+    val ecchi = CulturalNoteUi(
+        category = "Glosario cultural",
+        title = "Ecchi",
+        body = "Etiqueta asociada a humor sugerente, fanservice o situaciones picantes sin llegar necesariamente al contenido adulto explícito. En el anime comercial suele usarse como recurso cómico o de atracción visual.",
+        badge = "Etiqueta",
+        icon = Icons.Filled.MenuBook
+    )
+
+    val harem = CulturalNoteUi(
+        category = "Glosario cultural",
+        title = "Harén",
+        body = "Estructura narrativa donde un personaje central está rodeado de varios intereses románticos potenciales. Suele usarse en comedias románticas, fantasía o historias escolares para generar tensión afectiva, humor y competencia emocional.",
+        badge = "Narrativa",
+        icon = Icons.Filled.MenuBook
+    )
+
+    val samurai = CulturalNoteUi(
+        category = "Glosario cultural",
+        title = "Samurái",
+        body = "Figura guerrera del Japón histórico asociada al servicio, la disciplina y el honor. En el anime suele usarse para explorar tradición, jerarquía, lealtad y conflictos entre deber personal y normas sociales.",
+        badge = "Japón histórico",
+        icon = Icons.Filled.MenuBook
+    )
+
+    val yokai = CulturalNoteUi(
+        category = "Glosario cultural",
+        title = "Yōkai",
+        body = "Criaturas, espíritus o entidades sobrenaturales del folclore japonés. Permiten conectar la historia con creencias populares, relatos tradicionales, mitología japonesa y explicaciones fantásticas del mundo.",
+        badge = "Folclore",
+        icon = Icons.Filled.MenuBook
+    )
+
+    val otaku = CulturalNoteUi(
+        category = "Glosario cultural",
+        title = "Otaku",
+        body = "Persona con gran afición por anime, manga, videojuegos u otras formas de cultura popular japonesa. El término permite analizar comunidades fan, consumo cultural, identidad y circulación global del anime.",
+        badge = "Cultura fan",
+        icon = Icons.Filled.MenuBook
+    )
+
+    val school = CulturalNoteUi(
+        category = "Contexto cultural",
+        title = "Vida escolar japonesa",
+        body = "El contexto escolar en el anime suele representar amistad, disciplina, presión académica, clubes estudiantiles, festivales escolares y construcción de identidad durante la adolescencia.",
+        badge = "Escolar",
+        icon = Icons.Filled.Info
+    )
+
+    val historical = CulturalNoteUi(
+        category = "Contexto cultural",
+        title = "Japón histórico",
+        body = "Las obras históricas pueden presentar épocas antiguas, clanes, jerarquías sociales, guerras tradicionales o tensiones entre tradición y cambio. Ayudan a interpretar valores como honor, deber y autoridad.",
+        badge = "Historia",
+        icon = Icons.Filled.Info
+    )
+
+    val supernatural = CulturalNoteUi(
+        category = "Contexto cultural",
+        title = "Sobrenatural y folclore",
+        body = "Los elementos sobrenaturales en el anime suelen conectar con espíritus, demonios, maldiciones, mitos o creencias populares. Esto permite explorar cómo la ficción japonesa mezcla lo cotidiano con lo espiritual.",
+        badge = "Folclore",
+        icon = Icons.Filled.Info
+    )
+
+    val workplace = CulturalNoteUi(
+        category = "Contexto cultural",
+        title = "Cultura laboral",
+        body = "Las historias de entorno laboral pueden mostrar jerarquías profesionales, responsabilidades adultas, presión social, compañerismo y equilibrio entre vida personal y trabajo dentro de contextos japoneses o contemporáneos.",
+        badge = "Trabajo",
+        icon = Icons.Filled.Info
+    )
+
+    return mapOf(
+        "shonen" to shonen,
+        "shounen" to shonen,
+        "shōnen" to shonen,
+        "shonen" to shonen,
+
+        "shojo" to shojo,
+        "shoujo" to shojo,
+        "shōjo" to shojo,
+
+        "seinen" to seinen,
+        "josei" to josei,
+
+        "isekai" to isekai,
+        "mundo alternativo" to isekai,
+        "reencarnacion" to isekai,
+        "reencarnación" to isekai,
+
+        "girls love" to yuri,
+        "amor entre chicas" to yuri,
+        "yuri" to yuri,
+        "shoujo ai" to yuri,
+        "shojo ai" to yuri,
+
+        "boys love" to yaoi,
+        "amor entre chicos" to yaoi,
+        "yaoi" to yaoi,
+        "shounen ai" to yaoi,
+        "shonen ai" to yaoi,
+
+        "mecha" to mecha,
+        "robot" to mecha,
+        "robots" to mecha,
+
+        "mahou shoujo" to mahoShojo,
+        "mahou shojo" to mahoShojo,
+        "chica magica" to mahoShojo,
+        "chica mágica" to mahoShojo,
+
+        "slice of life" to sliceOfLife,
+        "recuentos de la vida" to sliceOfLife,
+        "vida cotidiana" to sliceOfLife,
+
+        "iyashikei" to iyashikei,
+        "ecchi" to ecchi,
+
+        "harem" to harem,
+        "haren" to harem,
+        "harén" to harem,
+
+        "samurai" to samurai,
+        "samurái" to samurai,
+
+        "youkai" to yokai,
+        "yokai" to yokai,
+        "yōkai" to yokai,
+
+        "otaku culture" to otaku,
+        "cultura otaku" to otaku,
+        "otaku" to otaku,
+
+        "school" to school,
+        "escolar" to school,
+
+        "historical" to historical,
+        "historico" to historical,
+        "histórico" to historical,
+
+        "supernatural" to supernatural,
+        "sobrenatural" to supernatural,
+
+        "workplace" to workplace,
+        "entorno laboral" to workplace
+    )
+}
+
+private fun String.isLowValueCulturalNote(): Boolean {
+    val normalized = normalizeCulturalKey()
+
+    return normalized.startsWith("dato de contexto") ||
+            normalized.startsWith("informacion complementaria") ||
+            normalized.startsWith("información complementaria") ||
+            normalized.startsWith("industria del anime") ||
+            normalized.startsWith("comite de produccion") ||
+            normalized.startsWith("comité de producción") ||
+            normalized.startsWith("emision japonesa") ||
+            normalized.startsWith("emisión japonesa")
+}
+
+private fun String.normalizeCulturalKey(): String {
+    return lowercase()
+        .replace("á", "a")
+        .replace("é", "e")
+        .replace("í", "i")
+        .replace("ó", "o")
+        .replace("ú", "u")
+        .replace("ü", "u")
+        .replace("ñ", "n")
+        .replace("ō", "o")
+        .replace("ū", "u")
+        .replace("–", "-")
+        .replace("—", "-")
+        .replace(Regex("[^a-z0-9\\s-]"), " ")
+        .replace(Regex("\\s+"), " ")
+        .trim()
+}
 
 private fun String.toCulturalNoteUi(): CulturalNoteUi {
     val cleanNote = trim()

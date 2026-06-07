@@ -71,6 +71,7 @@ import com.example.animedev20.ui.theme.domain.model.AnimeDetail
 import com.example.animedev20.ui.theme.domain.model.DurationType
 import com.example.animedev20.ui.theme.domain.model.EmissionStatus
 import com.example.animedev20.ui.theme.domain.model.Genre
+import com.example.animedev20.ui.theme.domain.model.RelatedAnime
 import com.example.animedev20.ui.theme.theme.AnimeDevTheme
 import com.example.animedev20.ui.theme.ux.AnimeDevCopy
 import com.example.animedev20.ui.theme.ux.AnimeDevErrorState
@@ -245,7 +246,10 @@ private fun AnimeDetailContent(
             }
 
             item {
-                AnimeStatsSection(anime = detail.anime)
+                AnimeStatsSection(
+                    anime = detail.anime,
+                    relatedAnime = detail.relatedAnime
+                )
             }
         }
     }
@@ -690,6 +694,7 @@ private fun CulturalNoteCard(
 @Composable
 private fun AnimeStatsSection(
     anime: Anime,
+    relatedAnime: List<RelatedAnime>,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -751,6 +756,24 @@ private fun AnimeStatsSection(
                 label = "Estado",
                 value = anime.emissionStatus.toReadableText()
             )
+
+            if (relatedAnime.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = "Relaciones de la obra",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
+                relatedAnime.forEach { relation ->
+                    AnimeStatRow(
+                        label = relation.relationLabel,
+                        value = relation.title
+                    )
+                }
+            }
         }
     }
 }

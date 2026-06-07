@@ -20,16 +20,21 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -91,6 +96,12 @@ fun HomeScreen(
         is HomeUiState.Success -> HomeSuccessContent(
             homeContent = state.homeContent,
             selectedGenreId = state.selectedGenreId,
+            searchQuery = state.searchQuery,
+            searchResults = state.searchResults,
+            isSearching = state.isSearching,
+            searchErrorMessage = state.searchErrorMessage,
+            onSearchQueryChange = viewModel::onSearchQueryChange,
+            onClearSearch = viewModel::clearSearch,
             onToggleGenre = viewModel::toggleGenreFilter,
             onAnimeSelected = onAnimeSelected
         )
@@ -101,6 +112,12 @@ fun HomeScreen(
 private fun HomeSuccessContent(
     homeContent: HomeContent,
     selectedGenreId: String?,
+    searchQuery: String,
+    searchResults: List<Anime>,
+    isSearching: Boolean,
+    searchErrorMessage: String?,
+    onSearchQueryChange: (String) -> Unit,
+    onClearSearch: () -> Unit,
     onToggleGenre: (String) -> Unit,
     onAnimeSelected: (Long) -> Unit,
     modifier: Modifier = Modifier
@@ -108,7 +125,6 @@ private fun HomeSuccessContent(
     val baseSections = homeContent.sections.filter { section ->
         section.animes.isNotEmpty() || section.genre.id == RECOMMENDATIONS_GENRE_ID
     }
-
     val visibleSections = if (selectedGenreId == null) {
         baseSections
     } else {
@@ -116,7 +132,6 @@ private fun HomeSuccessContent(
             section.genre.id == RECOMMENDATIONS_GENRE_ID || section.genre.id == selectedGenreId
         }
     }
-
     val selectedGenreName = homeContent.preferredGenres
         .firstOrNull { it.id == selectedGenreId }
         ?.name
@@ -132,6 +147,18 @@ private fun HomeSuccessContent(
         item {
             HomeHeader(
                 selectedGenreName = selectedGenreName
+            )
+        }
+
+        item {
+            HomeAnimeSearch(
+                query = searchQuery,
+                results = searchResults,
+                isSearching = isSearching,
+                errorMessage = searchErrorMessage,
+                onQueryChange = onSearchQueryChange,
+                onClear = onClearSearch,
+                onAnimeSelected = onAnimeSelected
             )
         }
 
@@ -190,7 +217,6 @@ private fun HomeHeader(
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold
         )
-
         Text(
             text = if (selectedGenreName == null) {
                 "Recomendaciones basadas en tus gustos, favoritos e historial dentro de AnimeDev."
@@ -200,6 +226,138 @@ private fun HomeHeader(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+    }
+}
+
+@Composable
+private fun HomeAnimeSearch(
+    query: String,
+    results: List<Anime>,
+    isSearching: Boolean,
+    errorMessage: String?,
+    onQueryChange: (String) -> Unit,
+    onClear: () -> Unit,
+    onAnimeSelected: (Long) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        OutlinedTextField(
+            value = query,
+            onValueChange = onQueryChange,
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            shape = MaterialTheme.shapes.large,
+            label = {
+                Text(text = "Busca un anime")
+            },
+            placeholder = {
+                Text(text = "Ej: Naruto, One Piece, Frieren...")
+            },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.Search,
+                    contentDescription = null
+                )
+            },
+            trailingIcon = {
+                when {
+                    isSearching -> {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp
+                        )
+                    }
+
+                    query.isNotBlank() -> {
+                        IconButton(onClick = onClear) {
+                            Icon(
+                                imageVector = Icons.Filled.Close,
+                                contentDescription = "Limpiar búsqueda"
+                            )
+                        }
+                    }
+                }
+            }
+        )
+
+        when {
+            errorMessage != null -> {
+                Text(
+                    text = errorMessage,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+
+            query.trim().length >= 2 && !isSearching && results.isEmpty() -> {
+                Text(
+                    text = "No encontramos animes con ese nombre.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            query.trim().length >= 2 && results.isNotEmpty() -> {
+                SearchResultsList(
+                    results = results,
+                    onAnimeSelected = onAnimeSelected
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SearchResultsList(
+    results: List<Anime>,
+    onAnimeSelected: (Long) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        results.forEach { anime ->
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+                ),
+                onClick = {
+                    onAnimeSelected(anime.id)
+                }
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    AsyncImage(
+                        model = anime.coverImageUrl,
+                        contentDescription = "Mini carátula de ${anime.title}",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .width(52.dp)
+                            .height(70.dp)
+                    )
+
+                    Text(
+                        text = anime.title,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -218,9 +376,7 @@ private fun HeroRecommendation(
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent
         ),
-        onClick = {
-            onAnimeSelected(anime.id)
-        }
+        onClick = { onAnimeSelected(anime.id) }
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             AsyncImage(
@@ -229,7 +385,6 @@ private fun HeroRecommendation(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
-
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -242,7 +397,6 @@ private fun HeroRecommendation(
                         )
                     )
             )
-
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
@@ -266,7 +420,6 @@ private fun HeroRecommendation(
                                 .size(16.dp)
                                 .clearAndSetSemantics { }
                         )
-
                         Text(
                             text = "Recomendado para ti",
                             style = MaterialTheme.typography.labelMedium,
@@ -284,7 +437,6 @@ private fun HeroRecommendation(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
-
                 Text(
                     text = anime.synopsis.ifBlank {
                         "Aún no tenemos sinopsis disponible para este anime."
@@ -294,7 +446,6 @@ private fun HeroRecommendation(
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
-
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -306,9 +457,7 @@ private fun HeroRecommendation(
                             .size(18.dp)
                             .clearAndSetSemantics { }
                     )
-
                     Spacer(modifier = Modifier.width(6.dp))
-
                     Text(
                         text = "Ver información",
                         style = MaterialTheme.typography.labelLarge,
@@ -353,13 +502,11 @@ private fun PreferredGenresSection(
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
-
         Text(
             text = "Elige un género para enfocar las recomendaciones. Tócalo de nuevo para ver todo.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -369,12 +516,8 @@ private fun PreferredGenresSection(
 
                 FilterChip(
                     selected = isSelected,
-                    onClick = {
-                        onToggleGenre(genre.id)
-                    },
-                    label = {
-                        Text(genre.name)
-                    },
+                    onClick = { onToggleGenre(genre.id) },
+                    label = { Text(genre.name) },
                     leadingIcon = if (isSelected) {
                         {
                             Icon(
@@ -418,7 +561,6 @@ private fun AnimeSectionRow(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
-
             Text(
                 text = section.subtitle(),
                 style = MaterialTheme.typography.bodySmall,
@@ -462,9 +604,7 @@ private fun AnimeCard(
             .width(166.dp)
             .height(274.dp),
         shape = MaterialTheme.shapes.large,
-        onClick = {
-            onAnimeSelected(anime.id)
-        }
+        onClick = { onAnimeSelected(anime.id) }
     ) {
         Column {
             Box {
@@ -476,7 +616,6 @@ private fun AnimeCard(
                         .fillMaxWidth()
                         .height(188.dp)
                 )
-
                 Surface(
                     modifier = Modifier
                         .align(Alignment.TopStart)
@@ -505,7 +644,6 @@ private fun AnimeCard(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
-
                 Text(
                     text = anime.genres.joinToString { it.name }
                         .ifBlank { "Sin géneros registrados" },
@@ -514,7 +652,6 @@ private fun AnimeCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -526,9 +663,7 @@ private fun AnimeCard(
                             .size(14.dp)
                             .clearAndSetSemantics { }
                     )
-
                     Spacer(modifier = Modifier.width(4.dp))
-
                     Text(
                         text = "Ver detalle",
                         style = MaterialTheme.typography.labelSmall,
@@ -571,6 +706,12 @@ private fun HomeSuccessPreview() {
                     sections = FakeDataSource.buildSectionsForGenres(FakeDataSource.preferredGenres)
                 ),
                 selectedGenreId = null,
+                searchQuery = "",
+                searchResults = emptyList(),
+                isSearching = false,
+                searchErrorMessage = null,
+                onSearchQueryChange = {},
+                onClearSearch = {},
                 onToggleGenre = {},
                 onAnimeSelected = {}
             )

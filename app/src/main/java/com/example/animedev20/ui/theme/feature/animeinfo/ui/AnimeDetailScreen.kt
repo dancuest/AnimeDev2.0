@@ -52,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
@@ -119,9 +120,7 @@ fun AnimeDetailScreen(
             isFavorite = state.isFavorite,
             isGuest = isGuest,
             onBack = onBack,
-            onTrivia = {
-                onTriviaRequested(state.detail.anime.id)
-            },
+            onTrivia = { onTriviaRequested(state.detail.anime.id) },
             onFavoriteToggle = viewModel::toggleFavorite
         )
     }
@@ -140,11 +139,10 @@ private fun AnimeDetailContent(
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
         rememberTopAppBarState()
     )
-
     val uriHandler = LocalUriHandler.current
-
-    val mangaUrl = detail.anime.mangaUrl
-        ?: detail.anime.mangaPlusUrl.takeIf { it.isNotBlank() }
+    val mangaUrl = detail.anime.mangaUrl ?: detail.anime.mangaPlusUrl.takeIf {
+        it.isNotBlank()
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -221,12 +219,8 @@ private fun AnimeDetailContent(
                 AnimePrimaryActions(
                     trailerUrl = detail.anime.trailerUrl,
                     mangaUrl = mangaUrl,
-                    onTrailer = { url ->
-                        uriHandler.openUri(url)
-                    },
-                    onManga = { url ->
-                        uriHandler.openUri(url)
-                    },
+                    onTrailer = { url -> uriHandler.openUri(url) },
+                    onManga = { url -> uriHandler.openUri(url) },
                     onTrivia = onTrivia
                 )
             }
@@ -240,10 +234,11 @@ private fun AnimeDetailContent(
             }
 
             item {
-                AnimeSynopsisSection(
-                    synopsis = detail.anime.synopsis,
-                    culturalNotes = detail.culturalNotes
-                )
+                AnimeSynopsisSection(synopsis = detail.anime.synopsis)
+            }
+
+            item {
+                CulturalLearningSection(culturalNotes = detail.culturalNotes)
             }
 
             item {
@@ -326,7 +321,9 @@ private fun AnimeHeroSection(
             )
 
             anime.originalTitle
-                ?.takeIf { it.isNotBlank() && !it.equals(anime.title, ignoreCase = true) }
+                ?.takeIf {
+                    it.isNotBlank() && !it.equals(anime.title, ignoreCase = true)
+                }
                 ?.let { originalTitle ->
                     Text(
                         text = originalTitle,
@@ -380,9 +377,7 @@ private fun AnimePrimaryActions(
 
         if (!trailerUrl.isNullOrBlank()) {
             OutlinedButton(
-                onClick = {
-                    onTrailer(trailerUrl)
-                },
+                onClick = { onTrailer(trailerUrl) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(
@@ -401,9 +396,7 @@ private fun AnimePrimaryActions(
 
         if (!mangaUrl.isNullOrBlank()) {
             OutlinedButton(
-                onClick = {
-                    onManga(mangaUrl)
-                },
+                onClick = { onManga(mangaUrl) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(
@@ -522,9 +515,7 @@ private fun GenreSection(
             genres.forEach { genre ->
                 AssistChip(
                     onClick = {},
-                    label = {
-                        Text(text = genre.name)
-                    },
+                    label = { Text(text = genre.name) },
                     colors = AssistChipDefaults.assistChipColors(
                         containerColor = MaterialTheme.colorScheme.surfaceVariant
                     )
@@ -537,7 +528,6 @@ private fun GenreSection(
 @Composable
 private fun AnimeSynopsisSection(
     synopsis: String,
-    culturalNotes: List<String>,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -551,21 +541,130 @@ private fun AnimeSynopsisSection(
         )
 
         Text(
-            text = synopsis.ifBlank {
-                "Sinopsis no disponible por ahora."
-            },
+            text = synopsis.ifBlank { "Sinopsis no disponible por ahora." },
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+    }
+}
 
-        if (culturalNotes.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(4.dp))
+@Composable
+private fun CulturalLearningSection(
+    culturalNotes: List<String>,
+    modifier: Modifier = Modifier
+) {
+    if (culturalNotes.isEmpty()) {
+        AnimeDevInfoCard(
+            title = "Fichas culturales en construcción",
+            message = "Todavía no hay suficiente información cultural disponible para este anime.",
+            modifier = modifier.padding(horizontal = 16.dp)
+        )
+        return
+    }
 
-            AnimeDevInfoCard(
-                title = "Notas culturales",
-                message = culturalNotes.joinToString(separator = "\n\n") { note ->
-                    "• $note"
+    val cards = culturalNotes
+        .filter { it.isNotBlank() }
+        .map { it.toCulturalNoteUi() }
+
+    Column(
+        modifier = modifier.padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = "Fichas culturales",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+
+            Text(
+                text = "Aprende el contexto cultural, histórico y narrativo detrás de esta obra.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        cards.forEach { card ->
+            CulturalNoteCard(note = card)
+        }
+    }
+}
+
+@Composable
+private fun CulturalNoteCard(
+    note: CulturalNoteUi,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        ),
+        shape = RoundedCornerShape(22.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Surface(
+                    shape = MaterialTheme.shapes.large,
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ) {
+                    Icon(
+                        imageVector = note.icon,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .size(18.dp)
+                            .clearAndSetSemantics { }
+                    )
                 }
+
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    Text(
+                        text = note.category,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold
+                    )
+
+                    Text(
+                        text = note.title,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                note.badge?.let { badge ->
+                    Surface(
+                        shape = MaterialTheme.shapes.large,
+                        color = MaterialTheme.colorScheme.surface
+                    ) {
+                        Text(
+                            text = badge,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+            }
+
+            Text(
+                text = note.body,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -681,6 +780,180 @@ private fun AnimeDetailError(
             onSecondaryAction = onBack
         )
     }
+}
+
+private data class CulturalNoteUi(
+    val category: String,
+    val title: String,
+    val body: String,
+    val badge: String? = null,
+    val icon: ImageVector
+)
+
+private fun String.toCulturalNoteUi(): CulturalNoteUi {
+    val cleanNote = trim()
+        .removePrefix("•")
+        .trim()
+
+    val normalized = cleanNote
+        .lowercase()
+        .normalizeForCulturalParsing()
+
+    return when {
+        normalized.startsWith("glosario cultural") -> {
+            val rawTerm = cleanNote
+                .substringAfter("—", missingDelimiterValue = "")
+                .ifBlank {
+                    cleanNote.substringAfter("-", missingDelimiterValue = "")
+                }
+                .trim()
+
+            val term = rawTerm
+                .substringBefore(":", missingDelimiterValue = "Término cultural")
+                .trim()
+                .ifBlank { "Término cultural" }
+
+            val body = rawTerm
+                .substringAfter(":", missingDelimiterValue = cleanNote)
+                .trim()
+                .ifBlank { cleanNote }
+
+            CulturalNoteUi(
+                category = "Glosario cultural",
+                title = term,
+                body = body,
+                badge = "Concepto",
+                icon = Icons.Filled.MenuBook
+            )
+        }
+
+        normalized.startsWith("ambientacion") -> CulturalNoteUi(
+            category = "Contexto de época",
+            title = cleanNote.titleBeforeColon(defaultTitle = "Ambientación"),
+            body = cleanNote.bodyAfterColon(),
+            badge = "Contexto",
+            icon = Icons.Filled.Info
+        )
+
+        normalized.startsWith("temporada original") -> CulturalNoteUi(
+            category = "Calendario japonés",
+            title = "Temporada original",
+            body = cleanNote.bodyAfterColon(),
+            badge = "Emisión",
+            icon = Icons.Filled.Star
+        )
+
+        normalized.startsWith("periodo de emision") -> CulturalNoteUi(
+            category = "Calendario japonés",
+            title = "Periodo de emisión",
+            body = cleanNote.bodyAfterColon(),
+            badge = "Emisión",
+            icon = Icons.Filled.Star
+        )
+
+        normalized.startsWith("emision japonesa") -> CulturalNoteUi(
+            category = "Televisión japonesa",
+            title = "Emisión japonesa",
+            body = cleanNote.bodyAfterColon(),
+            badge = "TV",
+            icon = Icons.Filled.Star
+        )
+
+        normalized.startsWith("origen de la obra") -> CulturalNoteUi(
+            category = "Origen narrativo",
+            title = "Origen de la obra",
+            body = cleanNote.bodyAfterColon(),
+            badge = "Fuente",
+            icon = Icons.Filled.MenuBook
+        )
+
+        normalized.startsWith("produccion y estilo visual") -> CulturalNoteUi(
+            category = "Producción",
+            title = "Estudio y estilo visual",
+            body = cleanNote.bodyAfterColon(),
+            badge = "Estudio",
+            icon = Icons.Filled.Info
+        )
+
+        normalized.startsWith("industria del anime") -> CulturalNoteUi(
+            category = "Industria cultural",
+            title = "Comité de producción",
+            body = cleanNote.bodyAfterColon(),
+            badge = "Industria",
+            icon = Icons.Filled.Info
+        )
+
+        normalized.startsWith("lectura cultural de los generos") -> CulturalNoteUi(
+            category = "Lectura cultural",
+            title = "Géneros y expectativas narrativas",
+            body = cleanNote.bodyAfterColon(),
+            badge = "Análisis",
+            icon = Icons.Filled.MenuBook
+        )
+
+        normalized.startsWith("temas narrativos relevantes") -> CulturalNoteUi(
+            category = "Temas narrativos",
+            title = "Conflictos y referencias",
+            body = cleanNote.bodyAfterColon(),
+            badge = "Temas",
+            icon = Icons.Filled.MenuBook
+        )
+
+        normalized.startsWith("demografia editorial") -> CulturalNoteUi(
+            category = "Demografía editorial",
+            title = "Tradición de publicación",
+            body = cleanNote.bodyAfterColon(),
+            badge = "Editorial",
+            icon = Icons.Filled.MenuBook
+        )
+
+        normalized.startsWith("dato de contexto") -> CulturalNoteUi(
+            category = "Dato de contexto",
+            title = "Información complementaria",
+            body = cleanNote.bodyAfterColon(),
+            badge = "Extra",
+            icon = Icons.Filled.Info
+        )
+
+        normalized.startsWith("contexto de estreno") -> CulturalNoteUi(
+            category = "Contexto histórico",
+            title = "Contexto de estreno",
+            body = cleanNote.bodyAfterColon(),
+            badge = "Época",
+            icon = Icons.Filled.Star
+        )
+
+        else -> CulturalNoteUi(
+            category = "Ficha cultural",
+            title = cleanNote.titleBeforeColon(defaultTitle = "Aprendizaje cultural"),
+            body = cleanNote.bodyAfterColon(),
+            badge = "Nota",
+            icon = Icons.Filled.Info
+        )
+    }
+}
+
+private fun String.titleBeforeColon(defaultTitle: String): String {
+    return substringBefore(":", missingDelimiterValue = defaultTitle)
+        .trim()
+        .ifBlank { defaultTitle }
+}
+
+private fun String.bodyAfterColon(): String {
+    return substringAfter(":", missingDelimiterValue = this)
+        .trim()
+        .ifBlank { this }
+}
+
+private fun String.normalizeForCulturalParsing(): String {
+    return this
+        .replace("á", "a")
+        .replace("é", "e")
+        .replace("í", "i")
+        .replace("ó", "o")
+        .replace("ú", "u")
+        .replace("ü", "u")
+        .replace("ñ", "n")
 }
 
 private fun DurationType.toReadableText(): String {

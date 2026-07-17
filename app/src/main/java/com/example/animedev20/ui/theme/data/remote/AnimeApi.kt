@@ -13,7 +13,9 @@ interface AnimeApi {
     suspend fun getHero(): ApiResponse<Anime>
 
     @GET("anime/top")
-    suspend fun getTop(@Query("limit") limit: Int = 10): ApiResponse<List<Anime>>
+    suspend fun getTop(
+        @Query("limit") limit: Int = 10
+    ): ApiResponse<List<Anime>>
 
     @GET("anime/by-genre/{genreId}")
     suspend fun getByGenre(
@@ -28,10 +30,16 @@ interface AnimeApi {
     ): ApiResponse<List<Anime>>
 
     @GET("anime/{id}/detail")
-    suspend fun getDetail(@Path("id") id: Long): ApiResponse<AnimeDetail>
+    suspend fun getDetail(
+        @Path("id") id: Long
+    ): ApiResponse<AnimeDetail>
+
 
     @GET("anime/{id}")
-    suspend fun getById(@Path("id") id: Long): ApiResponse<Anime>
+    suspend fun getById(
+        @Path("id") id: Long,
+        @Query("translate") translate: Boolean = true
+    ): ApiResponse<Anime>
 
     @GET("genres")
     suspend fun getGenres(

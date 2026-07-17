@@ -5,9 +5,7 @@ import com.example.animedev20.ui.theme.data.remote.AnimeApi
 import com.example.animedev20.ui.theme.domain.model.Anime
 import com.example.animedev20.ui.theme.domain.repository.FavoritesRepository
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,6 +23,9 @@ class RemoteFavoritesRepositoryImpl(
 
     companion object {
         private const val TAG = "RemoteFavoritesRepo"
+
+
+        private const val FAVORITE_REQUEST_DELAY_MS = 450L
     }
 
     private val favoriteAnimes = MutableStateFlow<List<Anime>>(emptyList())
@@ -41,36 +42,55 @@ class RemoteFavoritesRepositoryImpl(
     override suspend fun refreshFavorites() {
         refreshMutex.withLock {
             runCatching {
-                val favoriteIds = animeApi.getMyFavoriteIds().data.distinct()
+                val favoriteIds = animeApi
+                    .getMyFavoriteIds()
+                    .data
+                    .distinct()
 
-                val restoredFavorites = coroutineScope {
-                    favoriteIds.map { animeId ->
-                        async {
-                            runCatching {
+                val restoredFavorites = mutableListOf<Anime>()
 
-                                animeApi.getDetail(animeId).data.anime
-                            }.onFailure { error ->
-                                Log.w(
-                                    TAG,
-                                    "No se pudo cargar el detalle traducido del favorito id=$animeId",
-                                    error
-                                )
-                            }.getOrNull()
-                        }
-                    }.awaitAll().filterNotNull()
+
+                favoriteIds.forEachIndexed { index, animeId ->
+                    val anime = runCatching {
+                        animeApi.getById(
+                            id = animeId,
+                            translate = false
+                        ).data
+                    }.onFailure { error ->
+                        Log.w(
+                            TAG,
+                            "No se pudo restaurar el favorito id=$animeId",
+                            error
+                        )
+                    }.getOrNull()
+
+                    if (anime != null) {
+                        restoredFavorites += anime
+                    }
+
+                    if (index < favoriteIds.lastIndex) {
+                        delay(FAVORITE_REQUEST_DELAY_MS)
+                    }
                 }
 
                 favoriteAnimes.value = restoredFavorites
             }.onFailure { error ->
-                Log.w(TAG, "No se pudieron restaurar los favoritos remotos", error)
-                // NO vaciar el estado actual en fallos transitorios
+                Log.w(
+                    TAG,
+                    "No se pudieron restaurar los favoritos remotos",
+                    error
+                )
+
             }
         }
     }
 
     override suspend fun addFavorite(anime: Anime) {
         val current = favoriteAnimes.value
-        if (current.any { it.id == anime.id }) return
+
+        if (current.any { it.id == anime.id }) {
+            return
+        }
 
         favoriteAnimes.value = current + anime
     }

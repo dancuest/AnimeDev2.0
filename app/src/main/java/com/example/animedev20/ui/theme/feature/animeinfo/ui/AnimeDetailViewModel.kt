@@ -20,54 +20,149 @@ class AnimeDetailViewModel(
     private val interactionRepository: InteractionRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<AnimeDetailUiState>(AnimeDetailUiState.Loading)
-    val uiState: StateFlow<AnimeDetailUiState> = _uiState.asStateFlow()
+    private val _uiState =
+        MutableStateFlow<AnimeDetailUiState>(AnimeDetailUiState.Loading)
+
+    val uiState: StateFlow<AnimeDetailUiState> =
+        _uiState.asStateFlow()
+
+    private val _hasDisliked = MutableStateFlow(false)
+
+    val hasDisliked: StateFlow<Boolean> =
+        _hasDisliked.asStateFlow()
 
     private var latestFavoriteState: Boolean = false
+
     private var hasTrackedView: Boolean = false
 
     init {
         refreshFavoritesSnapshot()
         observeFavoriteStatus()
+        loadInteractionStatus()
         loadAnimeDetail()
     }
 
+    /**
+     * Carga el detalle del anime.
+     */
     fun loadAnimeDetail() {
         viewModelScope.launch {
             _uiState.value = AnimeDetailUiState.Loading
+
             val result = getAnimeDetailUseCase(animeId)
+
             result.fold(
                 onSuccess = { detail ->
-                    _uiState.value = AnimeDetailUiState.Success(detail, latestFavoriteState)
+
+                    _uiState.value =
+                        AnimeDetailUiState.Success(
+                            detail = detail,
+                            isFavorite = latestFavoriteState
+                        )
+
                     if (!hasTrackedView) {
                         runCatching {
-                            interactionRepository.trackView(detail.anime.id)
+                            interactionRepository.trackView(
+                                detail.anime.id
+                            )
                         }.onSuccess {
                             hasTrackedView = true
                         }.onFailure { error ->
-                            Log.w(TAG, "No se pudo registrar la vista del anime ${detail.anime.id}", error)
+                            Log.w(
+                                TAG,
+                                "No se pudo registrar la vista del anime " +
+                                        "${detail.anime.id}",
+                                error
+                            )
                         }
                     }
                 },
+
                 onFailure = { throwable ->
-                    _uiState.value = AnimeDetailUiState.Error(
-                        throwable.message ?: "No pudimos cargar la información del anime"
-                    )
+
+                    _uiState.value =
+                        AnimeDetailUiState.Error(
+                            throwable.message
+                                ?: "No pudimos cargar la información del anime"
+                        )
                 }
             )
         }
     }
 
+    /**
+     * Consulta en backend las interacciones persistidas del usuario
+     * con este anime.
+     *
+     * FAVORITE y DISLIKE son estados independientes.
+     */
+    private fun loadInteractionStatus() {
+        viewModelScope.launch {
+
+            runCatching {
+                interactionRepository.getInteractionStatus(
+                    animeId
+                )
+            }.onSuccess { status ->
+
+                _hasDisliked.value =
+                    status.hasDisliked
+
+                /*
+                 * El estado de favorito continúa siendo gestionado
+                 * por FavoritesRepository.
+                 *
+                 * No modificamos latestFavoriteState aquí porque
+                 * FAVORITE y DISLIKE son señales independientes.
+                 */
+
+                Log.d(
+                    TAG,
+                    "Estado de interacción cargado: " +
+                            "animeId=${status.animeId}, " +
+                            "isFavorite=${status.isFavorite}, " +
+                            "hasDisliked=${status.hasDisliked}"
+                )
+            }.onFailure { error ->
+
+                /*
+                 * Si no podemos consultar el estado, no impedimos
+                 * cargar el detalle. Simplemente mantenemos el estado
+                 * inicial del botón como false.
+                 */
+                Log.w(
+                    TAG,
+                    "No se pudo consultar el estado de interacción " +
+                            "del anime $animeId",
+                    error
+                )
+            }
+        }
+    }
+
+    /**
+     * Alterna el estado de favorito.
+     *
+     * IMPORTANTE:
+     * esta acción no modifica hasDisliked.
+     */
     fun toggleFavorite() {
         val currentState = _uiState.value
+
         if (currentState is AnimeDetailUiState.Success) {
+
             viewModelScope.launch {
+
                 runCatching {
-                    favoritesRepository.toggleFavorite(currentState.detail.anime)
+                    favoritesRepository.toggleFavorite(
+                        currentState.detail.anime
+                    )
                 }.onFailure { error ->
+
                     Log.w(
                         TAG,
-                        "No se pudo actualizar el favorito del anime ${currentState.detail.anime.id}",
+                        "No se pudo actualizar el favorito del anime " +
+                                "${currentState.detail.anime.id}",
                         error
                     )
                 }
@@ -75,28 +170,108 @@ class AnimeDetailViewModel(
         }
     }
 
-    private fun refreshFavoritesSnapshot() {
-        viewModelScope.launch {
-            runCatching {
-                favoritesRepository.refreshFavorites()
-            }
-        }
-    }
+    /**
+     * Registra una señal DISLIKE.
+     *
+     * El DISLIKE es independiente del estado de favorito.
+     * Por lo tanto, marcar un anime como DISLIKE no lo elimina
+     * de favoritos.
+     */
+    fun trackDislike() {
 
-    private fun observeFavoriteStatus() {
-        viewModelScope.launch {
-            favoritesRepository.isFavorite(animeId).collect { isFavorite ->
-                latestFavoriteState = isFavorite
-                val currentState = _uiState.value
-                if (currentState is AnimeDetailUiState.Success) {
-                    _uiState.value = currentState.copy(isFavorite = isFavorite)
+        if (_hasDisliked.value) {
+            return
+        }
+
+        val currentState = _uiState.value
+
+        if (currentState is AnimeDetailUiState.Success) {
+
+            viewModelScope.launch {
+
+                runCatching {
+
+                    interactionRepository.trackDislike(
+                        currentState.detail.anime.id
+                    )
+
+                }.onSuccess {
+
+                    _hasDisliked.value = true
+
+                    Log.d(
+                        TAG,
+                        "DISLIKE registrado para el anime " +
+                                "${currentState.detail.anime.id}"
+                    )
+
+                }.onFailure { error ->
+
+                    Log.w(
+                        TAG,
+                        "No se pudo registrar el DISLIKE del anime " +
+                                "${currentState.detail.anime.id}",
+                        error
+                    )
                 }
             }
         }
     }
 
+    /**
+     * Actualiza la fotografía local del estado de favoritos.
+     */
+    private fun refreshFavoritesSnapshot() {
+        viewModelScope.launch {
+
+            runCatching {
+                favoritesRepository.refreshFavorites()
+            }.onFailure { error ->
+
+                Log.w(
+                    TAG,
+                    "No se pudieron actualizar los favoritos",
+                    error
+                )
+            }
+        }
+    }
+
+    /**
+     * Observa los cambios del estado de favorito.
+     *
+     * Este estado es independiente de hasDisliked.
+     */
+    private fun observeFavoriteStatus() {
+        viewModelScope.launch {
+
+            favoritesRepository
+                .isFavorite(animeId)
+                .collect { isFavorite ->
+
+                    latestFavoriteState = isFavorite
+
+                    val currentState =
+                        _uiState.value
+
+                    if (
+                        currentState
+                                is AnimeDetailUiState.Success
+                    ) {
+
+                        _uiState.value =
+                            currentState.copy(
+                                isFavorite = isFavorite
+                            )
+                    }
+                }
+        }
+    }
+
     companion object {
-        private const val TAG = "AnimeDetailViewModel"
+
+        private const val TAG =
+            "AnimeDetailViewModel"
 
         fun provideFactory(
             animeId: Long,
@@ -105,9 +280,17 @@ class AnimeDetailViewModel(
             interactionRepository: InteractionRepository
         ): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {
+
                 @Suppress("UNCHECKED_CAST")
-                override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    val useCase = GetAnimeDetailUseCase(animeRepository)
+                override fun <T : ViewModel> create(
+                    modelClass: Class<T>
+                ): T {
+
+                    val useCase =
+                        GetAnimeDetailUseCase(
+                            animeRepository
+                        )
+
                     return AnimeDetailViewModel(
                         animeId = animeId,
                         getAnimeDetailUseCase = useCase,

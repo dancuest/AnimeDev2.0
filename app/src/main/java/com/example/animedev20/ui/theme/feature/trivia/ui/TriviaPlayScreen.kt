@@ -115,7 +115,8 @@ fun TriviaPlayScreen(
             animeId = animeId,
             animeRepository = remoteAppContainer.animeRepository,
             triviaRepository = remoteAppContainer.triviaRepository,
-            userRepository = remoteAppContainer.userRepository
+            userRepository = remoteAppContainer.userRepository,
+            favoritesRepository = remoteAppContainer.favoritesRepository
         )
     )
 

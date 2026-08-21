@@ -1,6 +1,7 @@
 package com.example.animedev20.ui.theme.data.repository
 
 import com.example.animedev20.ui.theme.data.remote.InteractionRequest
+import com.example.animedev20.ui.theme.data.remote.InteractionStatusResponse
 import com.example.animedev20.ui.theme.data.remote.InteractionsApi
 import com.example.animedev20.ui.theme.domain.repository.InteractionRepository
 
@@ -35,7 +36,20 @@ class RemoteInteractionRepositoryImpl(
         )
     }
 
-    override suspend fun trackTriviaScore(animeId: Long, score: Int, totalQuestions: Int) {
+    override suspend fun trackDislike(animeId: Long) {
+        interactionsApi.postInteraction(
+            InteractionRequest(
+                type = "DISLIKE",
+                animeId = animeId
+            )
+        )
+    }
+
+    override suspend fun trackTriviaScore(
+        animeId: Long,
+        score: Int,
+        totalQuestions: Int
+    ) {
         interactionsApi.postInteraction(
             InteractionRequest(
                 type = "TRIVIA_SCORE",
@@ -46,5 +60,11 @@ class RemoteInteractionRepositoryImpl(
                 )
             )
         )
+    }
+
+    override suspend fun getInteractionStatus(
+        animeId: Long
+    ): InteractionStatusResponse {
+        return interactionsApi.getInteractionStatus(animeId)
     }
 }

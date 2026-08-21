@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Quiz
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
@@ -96,6 +97,7 @@ fun AnimeDetailScreen(
     )
 
     val uiState by viewModel.uiState.collectAsState()
+    val hasDisliked by viewModel.hasDisliked.collectAsState()
 
     val isGuest by produceState(
         initialValue = true,
@@ -124,6 +126,8 @@ fun AnimeDetailScreen(
             onBack = onBack,
             onTrivia = { onTriviaRequested(state.detail.anime.id) },
             onFavoriteToggle = viewModel::toggleFavorite,
+            onDislike = viewModel::trackDislike,
+            hasDisliked = hasDisliked,
             onAnimeSelected = onAnimeSelected
         )
     }
@@ -138,6 +142,8 @@ private fun AnimeDetailContent(
     onBack: () -> Unit,
     onTrivia: () -> Unit,
     onFavoriteToggle: () -> Unit,
+    onDislike: () -> Unit,
+    hasDisliked: Boolean,
     onAnimeSelected: (Long) -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
@@ -225,7 +231,10 @@ private fun AnimeDetailContent(
                     mangaUrl = mangaUrl,
                     onTrailer = { url -> uriHandler.openUri(url) },
                     onManga = { url -> uriHandler.openUri(url) },
-                    onTrivia = onTrivia
+                    onTrivia = onTrivia,
+                    onDislike = onDislike,
+                    hasDisliked = hasDisliked,
+                    isGuest = isGuest
                 )
             }
 
@@ -361,6 +370,9 @@ private fun AnimePrimaryActions(
     onTrailer: (String) -> Unit,
     onManga: (String) -> Unit,
     onTrivia: () -> Unit,
+    onDislike: () -> Unit,
+    hasDisliked: Boolean,
+    isGuest: Boolean,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -421,6 +433,32 @@ private fun AnimePrimaryActions(
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Text("Ver manga relacionado")
+            }
+        }
+
+        if (!isGuest) {
+            OutlinedButton(
+                onClick = onDislike,
+                enabled = !hasDisliked,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.ThumbDown,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(18.dp)
+                        .clearAndSetSemantics { }
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text(
+                    text = if (hasDisliked) {
+                        "No me interesa ✓"
+                    } else {
+                        "No me interesa"
+                    }
+                )
             }
         }
     }
@@ -1358,6 +1396,8 @@ private fun AnimeDetailPreview() {
                 onBack = {},
                 onTrivia = {},
                 onFavoriteToggle = {},
+                onDislike = {},
+                hasDisliked = false,
                 onAnimeSelected = {}
             )
         }

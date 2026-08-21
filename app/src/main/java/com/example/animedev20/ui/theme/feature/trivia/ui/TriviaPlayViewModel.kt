@@ -3,17 +3,18 @@ package com.example.animedev20.ui.theme.feature.trivia.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.animedev20.ui.theme.data.repository.FakeAnimeRepositoryImpl
-import com.example.animedev20.ui.theme.data.repository.FakeTriviaRepositoryImpl
 import com.example.animedev20.ui.theme.domain.model.Anime
 import com.example.animedev20.ui.theme.domain.model.Trivias.TriviaDifficulty
 import com.example.animedev20.ui.theme.domain.model.Trivias.TriviaQuestion
 import com.example.animedev20.ui.theme.domain.repository.AnimeRepository
+import com.example.animedev20.ui.theme.domain.repository.FavoritesRepository
 import com.example.animedev20.ui.theme.domain.repository.TriviaRepository
+import com.example.animedev20.ui.theme.domain.repository.UserRepository
 import com.example.animedev20.ui.theme.domain.usecase.GetAnimeDetailUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 sealed interface TriviaPlayUiState {
@@ -39,10 +40,15 @@ data class TriviaPlayState(
 class TriviaPlayViewModel(
     private val animeId: Long,
     private val getAnimeDetailUseCase: GetAnimeDetailUseCase,
-    private val triviaRepository: TriviaRepository
+    private val triviaRepository: TriviaRepository,
+    private val userRepository: UserRepository,
+    private val favoritesRepository: FavoritesRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<TriviaPlayUiState>(TriviaPlayUiState.Loading)
+    private val _uiState = MutableStateFlow<TriviaPlayUiState>(
+        TriviaPlayUiState.Loading
+    )
+
     val uiState: StateFlow<TriviaPlayUiState> = _uiState.asStateFlow()
 
     init {
@@ -52,14 +58,19 @@ class TriviaPlayViewModel(
     private fun loadAnime() {
         viewModelScope.launch {
             val result = getAnimeDetailUseCase(animeId)
+
             result.fold(
                 onSuccess = { detail ->
-                    _uiState.value =
-                        TriviaPlayUiState.Success(TriviaPlayState(anime = detail.anime))
+                    _uiState.value = TriviaPlayUiState.Success(
+                        TriviaPlayState(
+                            anime = detail.anime
+                        )
+                    )
                 },
                 onFailure = { throwable ->
                     _uiState.value = TriviaPlayUiState.Error(
-                        throwable.message ?: "No encontramos información del anime"
+                        throwable.message
+                            ?: "No encontramos información del anime."
                     )
                 }
             )
@@ -67,37 +78,138 @@ class TriviaPlayViewModel(
     }
 
     fun selectDifficulty(difficulty: TriviaDifficulty) {
-        val current = (_uiState.value as? TriviaPlayUiState.Success)?.state ?: return
+        val current =
+            (_uiState.value as? TriviaPlayUiState.Success)?.state
+                ?: return
+
         _uiState.value = TriviaPlayUiState.Loading
+
         viewModelScope.launch {
-            runCatching { triviaRepository.getQuestions(animeId, difficulty) }
-                .onSuccess { questions ->
-                    _uiState.value = TriviaPlayUiState.Success(
-                        current.copy(
-                            difficulty = difficulty,
-                            questions = questions,
-                            currentIndex = 0,
-                            selectedAnswer = null,
-                            isAnswerCorrect = null,
-                            score = 0,
-                            finished = false
-                        )
+            runCatching {
+                validateTriviaAccessForCurrentUser()
+
+                triviaRepository.getQuestions(
+                    animeId = animeId,
+                    difficulty = difficulty
+                )
+            }.onSuccess { questions ->
+
+                _uiState.value = TriviaPlayUiState.Success(
+                    current.copy(
+                        difficulty = difficulty,
+                        questions = questions,
+                        currentIndex = 0,
+                        selectedAnswer = null,
+                        isAnswerCorrect = null,
+                        score = 0,
+                        finished = false
                     )
+                )
+
+            }.onFailure { throwable ->
+
+                val rawMessage = throwable.message.orEmpty()
+
+                val friendlyMessage = when {
+                    rawMessage.contains(
+                        FAVORITE_REQUIRED_ERROR,
+                        ignoreCase = true
+                    ) -> {
+                        "Para jugar esta trivia, primero agrega este anime a favoritos. " +
+                                "Los invitados pueden probar trivias libremente, " +
+                                "pero los usuarios registrados deben desbloquearlas desde favoritos."
+                    }
+
+                    rawMessage.contains(
+                        "Anime not found in favorites",
+                        ignoreCase = true
+                    ) -> {
+                        "Para jugar esta trivia, primero agrega este anime a favoritos."
+                    }
+
+                    else -> {
+                        rawMessage.ifBlank {
+                            "No pudimos preparar la trivia."
+                        }
+                    }
                 }
-                .onFailure { throwable ->
-                    _uiState.value = TriviaPlayUiState.Error(
-                        throwable.message ?: "No pudimos preparar la trivia"
-                    )
-                }
+
+                _uiState.value = TriviaPlayUiState.Error(
+                    friendlyMessage
+                )
+            }
+        }
+    }
+
+    /**
+     * Comprueba que un usuario registrado tenga el anime
+     * actualmente en favoritos antes de permitir jugar.
+     *
+     * Importante:
+     * primero fuerza la actualización de favoritos remotos
+     * y solamente después consulta si el anime está presente.
+     */
+    private suspend fun validateTriviaAccessForCurrentUser() {
+
+        val isGuest = runCatching {
+            userRepository
+                .getUserProfile()
+                .email
+                .isBlank()
+        }.getOrDefault(true)
+
+        // Los invitados pueden jugar libremente.
+        if (isGuest) {
+            return
+        }
+
+        /*
+         * El repositorio remoto carga los favoritos de forma
+         * asíncrona al crearse el AppContainer.
+         *
+         * Por eso no debemos consultar favorites inmediatamente.
+         * Primero esperamos a que termine la sincronización.
+         */
+        favoritesRepository.refreshFavorites()
+
+        /*
+         * Ahora sí consultamos el estado actualizado.
+         */
+        val isAnimeInFavorites = runCatching {
+            favoritesRepository
+                .isFavorite(animeId)
+                .first()
+        }.getOrDefault(false)
+
+        if (!isAnimeInFavorites) {
+            throw IllegalStateException(
+                FAVORITE_REQUIRED_ERROR
+            )
         }
     }
 
     fun answerQuestion(answerIndex: Int) {
-        val state = (_uiState.value as? TriviaPlayUiState.Success)?.state ?: return
-        val currentQuestion = state.currentQuestion ?: return
-        if (state.selectedAnswer != null) return
-        val isCorrect = currentQuestion.correctAnswerIndex == answerIndex
-        val newScore = if (isCorrect) state.score + 1 else state.score
+        val state =
+            (_uiState.value as? TriviaPlayUiState.Success)?.state
+                ?: return
+
+        val currentQuestion = state.currentQuestion
+            ?: return
+
+        if (state.selectedAnswer != null) {
+            return
+        }
+
+        val isCorrect =
+            currentQuestion.correctAnswerIndex == answerIndex
+
+        val newScore =
+            if (isCorrect) {
+                state.score + 1
+            } else {
+                state.score
+            }
+
         _uiState.value = TriviaPlayUiState.Success(
             state.copy(
                 selectedAnswer = answerIndex,
@@ -108,9 +220,17 @@ class TriviaPlayViewModel(
     }
 
     fun goToNextQuestion() {
-        val content = (_uiState.value as? TriviaPlayUiState.Success)?.state ?: return
-        if (content.selectedAnswer == null) return
-        val isLastQuestion = content.currentIndex >= content.totalQuestions - 1
+        val content =
+            (_uiState.value as? TriviaPlayUiState.Success)?.state
+                ?: return
+
+        if (content.selectedAnswer == null) {
+            return
+        }
+
+        val isLastQuestion =
+            content.currentIndex >= content.totalQuestions - 1
+
         if (isLastQuestion) {
             finishQuiz(content)
         } else {
@@ -125,9 +245,24 @@ class TriviaPlayViewModel(
     }
 
     private fun finishQuiz(state: TriviaPlayState) {
-        _uiState.value = TriviaPlayUiState.Success(state.copy(finished = true))
+        _uiState.value = TriviaPlayUiState.Success(
+            state.copy(finished = true)
+        )
+
         val difficulty = state.difficulty ?: return
+
         viewModelScope.launch {
+            val shouldRecordResult = runCatching {
+                userRepository
+                    .getUserProfile()
+                    .email
+                    .isNotBlank()
+            }.getOrDefault(false)
+
+            if (!shouldRecordResult) {
+                return@launch
+            }
+
             triviaRepository.recordResult(
                 animeId = animeId,
                 difficulty = difficulty,
@@ -138,7 +273,10 @@ class TriviaPlayViewModel(
     }
 
     fun restart() {
-        val current = (_uiState.value as? TriviaPlayUiState.Success)?.state ?: return
+        val current =
+            (_uiState.value as? TriviaPlayUiState.Success)?.state
+                ?: return
+
         _uiState.value = TriviaPlayUiState.Success(
             current.copy(
                 difficulty = null,
@@ -158,17 +296,47 @@ class TriviaPlayViewModel(
     }
 
     companion object {
-        fun provideFactory(animeId: Long): ViewModelProvider.Factory =
+
+        private const val FAVORITE_REQUIRED_ERROR =
+            "TRIVIA_REQUIRES_FAVORITE"
+
+        fun provideFactory(
+            animeId: Long,
+            animeRepository: AnimeRepository,
+            triviaRepository: TriviaRepository,
+            userRepository: UserRepository,
+            favoritesRepository: FavoritesRepository
+        ): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {
+
                 @Suppress("UNCHECKED_CAST")
-                override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    val repository: AnimeRepository = FakeAnimeRepositoryImpl()
-                    val useCase = GetAnimeDetailUseCase(repository)
-                    return TriviaPlayViewModel(
-                        animeId = animeId,
-                        getAnimeDetailUseCase = useCase,
-                        triviaRepository = FakeTriviaRepositoryImpl
-                    ) as T
+                override fun <T : ViewModel> create(
+                    modelClass: Class<T>
+                ): T {
+
+                    if (
+                        modelClass.isAssignableFrom(
+                            TriviaPlayViewModel::class.java
+                        )
+                    ) {
+
+                        val useCase =
+                            GetAnimeDetailUseCase(
+                                animeRepository
+                            )
+
+                        return TriviaPlayViewModel(
+                            animeId = animeId,
+                            getAnimeDetailUseCase = useCase,
+                            triviaRepository = triviaRepository,
+                            userRepository = userRepository,
+                            favoritesRepository = favoritesRepository
+                        ) as T
+                    }
+
+                    throw IllegalArgumentException(
+                        "Unknown ViewModel class"
+                    )
                 }
             }
     }
